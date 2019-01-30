@@ -17,7 +17,6 @@ year = 'all'
 ### Rdata里面year==1995的数据是1994年的数据，所以其实缺的是1994年的数据。
 
 
-
 dat0 = read.csv(fname, header=F, stringsAsFactors = FALSE)
 indexn = dat0[2,4]
 yearrange = gsub('年', '', dat0[1,])[c(-1:-3)]
@@ -27,19 +26,36 @@ colnames(dat) = c('city', yearrange)
 plot(1:dim(dat)[2], dat[1,])
 dat1 = apply(dat[,-1], MARGIN=2, FUN=as.numeric)
 rownames(dat1) = dat$city
+
 ### 异常值怎么办？
 ### 悲惨呀戛然而止的代码
 ### 方法一：算出每个点i周围几个点的平均值和方差（不包括点i）
 ### 点i和周围几个点的平均值的差大于3倍的方差，就算做异常值
 ### 方法二：计算每个点删除后，拟合度的下降率
-for (i in dim(dat1)[1]){
-	for (j in dim(dat1)[2]){
+cityi = as.numeric(dat[1,c(-1)])
+citydata = data.frame(year=yearrange,cityi=cityi)
+citydata = na.omit(citydata)
+a = na.omit(as.numeric(dat1[1,]))
+kresult = kmeans(a,2)
+a1 = a[kresult$cluster==2]
+plot(a1)
+dd <- cbind(citydata, cluster = kresult$cluster)
+sub1 = subset(dd, dd$cluster==1)
+plot(sub1$year,sub1$cityi)
+
+
+
+for (i in 1:dim(dat1)[1]){
+	for (j in 3:dim(dat1)[2]){
 		if (dat[i,j] != NA){
-			ijbar = mean(dat1[i,c(j+1:j+5)])
-			
-		
-######没写完，先写到这儿吧。太花时间了。	
-		
+			ijbar = mean(dat1[i,c(j-3,-2,j-1,j+1,j+2,j+3)])
+			ijvar = var(dat1[i,c(j-3,-2,j-1,j+1,j+2,j+3)])
+
+
+
+
+######没写完，先写到这儿吧。太花时间了。
+
 centers<-k$centers[k$cluster,]
 distances<-sqrt(rowSums(ij-mean(ij))^2)
 outlier<-(order(distances,decreasing=TRUE))[1:5]
