@@ -1,5 +1,5 @@
-f = 'shanxi.txt'
-l = 'N2010010103000'
+f = '2014.txt'
+l = 'N2015040001000'
 setwd('C:/Sync/temp/url')
 for (i in 1:9){ 
 	link = paste0("http://data.cnki.net/download/excel?filecode=",l,"00",i)

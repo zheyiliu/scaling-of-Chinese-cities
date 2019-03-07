@@ -1,0 +1,29 @@
+Sub getCSV()
+'这是网上看到的xlsx批量转化，而改写的一个xlsx批量转化csv格式
+'1)批量转化csv参考：http://club.excelhome.net/thread-1036776-2-1.html
+'2)创建文件夹参考：http://jingyan.baidu.com/article/f54ae2fcdc79bc1e92b8491f.html
+'这里设置屏幕不动，警告忽略
+Application.DisplayAlerts = False
+Application.ScreenUpdating = False
+Dim data As Workbook
+'这里用GetOpenFilename弹出一个多选窗口，选中我们要转化成csv的xlsx文件，
+file = Application.GetOpenFilename(MultiSelect:=True)
+'用LBound和UBound
+For i = LBound(file) To UBound(file)
+    Workbooks.Open Filename:=file(i)
+    Set data = ActiveWorkbook
+    Path = data.Path
+    '这里设置要保存在目录下面的csv文件夹里,之后可以自己调
+    '参考了里面的第一种方法
+    On Error Resume Next
+    VBA.MkDir (Path & "\csv")
+    With data
+        .SaveAs Path & "\csv\" & Replace(data.Name, ".xls", ".csv"), xlCSV
+        .Close True
+      End With
+Next i
+'弹出对话框表示转化已完成，这时去相应地方的csv里查看即可
+MsgBox "已转换了" & (i - 1) & "个文档"
+Application.ScreenUpdating = True
+Application.DisplayAlerts = True
+End Sub

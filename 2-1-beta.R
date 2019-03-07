@@ -1,7 +1,7 @@
 library(ggplot2)
-library(smatr)
-library(tls)
-library(deming)
+#library(smatr)
+#library(tls)
+#library(deming)
 
 setwd('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL')
 for (rdat in dir()){load(rdat)}

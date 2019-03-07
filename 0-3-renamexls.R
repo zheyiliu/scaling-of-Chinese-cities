@@ -1,4 +1,4 @@
-### 添加.xls后缀
+### 添加.xls后缀，因为原来是在Linux下载的，没有后缀
 setwd('C:/Sync/CoolGirl/Fhe/ecosocialdata/原始数据/alldata/')
 for (year in dir()){
   setwd(paste('C:/Sync/CoolGirl/Fhe/ecosocialdata/原始数据/alldata/',year,sep=''))

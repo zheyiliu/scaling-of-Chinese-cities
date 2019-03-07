@@ -39,7 +39,7 @@ SearchCorValue = function(ORI, COR){ #找到某指标对应的另一指标的值
 	}
 	return(corValueDF)
 }
-
+#Method='POP' or 'PD', reverse=F or T
 Threshold = function(Method='POP',rangeStatList=c('市辖区','Districts','BetaD/'),rangeyear=1985:2017,rangey=dflist,reverse=F,pix=100){
   sumlmHorizontal = data.frame()
   for (yeari in rangeyear){
