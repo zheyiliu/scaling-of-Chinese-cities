@@ -4,11 +4,11 @@ root = 'C:/Sync/CoolGirl/Fhe/ecosocialDATA/'
 setwd(paste0(root, 'indexSQL'))
 for (rdat in dir()){load(rdat)}
 
-Rdataname = 'GDP' #需要操作的Rdata
+Rdataname = 'Area' #需要操作的Rdata
 rangeStat = '市辖区'
-fname = paste0('1992-1',rangeStat,'GDP.csv') #需要增添的数据文件
+year = 2007
+fname = paste0(year,'-1',rangeStat,Rdataname,'.csv') #需要增添的数据文件
 indexname = unique(get(Rdataname)$index)[grep(rangeStat, unique(get(Rdataname)$index))]
-year = 1992
 ### Rdata里面year==1995的数据是1994年的数据，所以其实缺的是1994年的数据。
 
 
@@ -51,7 +51,8 @@ a = table(subset(get(Rdataname), grepl(rangeStat, get(Rdataname)$index))$year)
 b = table(subset(df, grepl(rangeStat, df$index))$year)
 
 df$value = as.numeric(df$value)
+df = df[which(grepl('市',df$city)),]
 
 assign(Rdataname, df)
 
-save(GDP, file=paste0(root, 'indexSQL/',Rdataname,'.Rdata'))
+eval(parse(text=paste0('save(', Rdataname, ",file='", root, 'indexSQL/',Rdataname,".Rdata')")))
