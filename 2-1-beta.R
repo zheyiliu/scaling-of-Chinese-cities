@@ -176,6 +176,7 @@ SearchCorValue = function(ORI, COR){ #找到某指标对应的另一指标的值
 
 
 dflist = gsub('.Rdata', '', dir('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQLforCal'))
+#dflist = gsub('.Rdata', '', dir('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL'))
 
 ############## OLS
 sumlmHorizontal = data.frame()
@@ -452,7 +453,7 @@ dfBeta$yIndex = as.character(dfBeta$yIndex)
 for(i in 1:dim(dfBeta)[1]){dfBeta$yIndex[i] = gsub(rangeStatList[1], '',dfBeta$yIndex[i])}
 p = ggplot(data=dfBeta, aes(x=reorder(yIndex,Beta), y=Beta, color=type)) + 
 	geom_point(size = 2.2) +
-	geom_errorbar(aes(ymin=BetaLower, ymax=BetaUpper), width=.1,) +
+	geom_errorbar(aes(ymin=BetaLower, ymax=BetaUpper), width=.1,alpha=0.4) +
 	geom_hline(yintercept = c(7/6,1,5/6),alpha=0.4) +
 	labs(x = 'Urban attributes', y='β') +
 	theme(text = element_text(size=18),

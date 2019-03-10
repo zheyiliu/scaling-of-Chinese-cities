@@ -3,7 +3,7 @@ for (rdat in dir()){load(rdat)}
 dflist = gsub('.Rdata', '', dir('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL'))
 
 rangeStat = '市辖区'
-dfname = 'Green'
+dfname = 'POP'
 dfi = get(dfname)
 dfi = dfi[which(grepl('市',dfi$city)),]
 citylist = read.csv(file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/city_info.csv',stringsAsFactors=F)

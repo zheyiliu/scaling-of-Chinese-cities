@@ -1,33 +1,40 @@
 
+setwd('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL')
+for (rdat in dir()){load(rdat)}
+
+# dflist = gsub('.Rdata', '', dir('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL'))
+# 
+# 
+# citylist = read.csv(file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/city_info.csv',stringsAsFactors=F)
+# citypre = subset(citylist, citylist$Administrative_level != 'county')$City_ch
+# n = 15
+# par(mfrow=c(4,5))
+# for (cityi in citypre[(n*20-19):(n*20)]){
+#   dat = dfi[which(dfi$city == cityi & grepl(rangeStat,dfi$index)),]
+#   dat = na.omit(dat)
+#   if(dim(dat)[1]>0){
+#     plot(as.numeric(dat$year)-1, dat$value, main=cityi,xlab='year',ylab=dfname,pch=1, xlim=c(1985,2017))
+#   } else {
+#     plot(1:5,1:5,main=cityi,xlab='year',ylab=dfname,cex=0)
+#   }
+# }
+
+
+Outliers = function(cityi0, yeari0, valuei0){
+  dfi[which(dfi$city == cityi0 & grepl(rangeStat,dfi$index) & dfi$year %in% yeari0),]$value = valuei0
+  dfi
+}
+
 ###############################################################
 ###############################################################
 ###############################################################
 
 ### Area has been done!
 
-setwd('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL')
-for (rdat in dir()){load(rdat)}
-dflist = gsub('.Rdata', '', dir('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL'))
-
 rangeStat = '市辖区'
 dfname = 'Area'
 dfi = get(dfname)
-citylist = sort(unique(dfi$city))
-n = 15
-par(mfrow=c(4,5))
-for (cityi in citylist[(n*20-19):(n*20)]){
-  dat = dfi[which(dfi$city == cityi & grepl(rangeStat,dfi$index)),]
-  dat = na.omit(dat)
-  if(dim(dat)[1]>0){plot(dat$year, dat$value, main=cityi,xlab='year',ylab=dfname)}
-}
-
-
-Outliers = function(cityi0, yeari0, valuei0){
-  dat0 = dfi[which(dfi$city == cityi0 & grepl(rangeStat,dfi$index)),]
-  dat0[order(dat0$year),2:5]
-  dfi[which(dfi$city == cityi0 & grepl(rangeStat,dfi$index) & dfi$year==yeari0),]$value = valuei0
-  dfi
-}
+dfi = dfi[which(grepl('市',dfi$city)),]
 
 dfi = Outliers('巴中市', 2014, 2560)
 dfi = Outliers('白城市', 1989, 978)
@@ -112,7 +119,6 @@ cityi0 = '咸宁市'
 dat0 = dfi[which(dfi$city == cityi0 & grepl(rangeStat,dfi$index)),]
 dat0[order(dat0$year),2:5]
 
-
 assign(dfname, dfi)
 eval(parse(text=paste0('save(',dfname,",file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL/",dfname,".Rdata')")))
 
@@ -125,24 +131,10 @@ eval(parse(text=paste0('save(',dfname,",file='C:/Sync/CoolGirl/Fhe/ecosocialDATA
 
 ### POP has been done!
 
+rangeStat = '市辖区'
 dfname = 'POP'
 dfi = get(dfname)
 dfi = dfi[which(grepl('市',dfi$city)),]
-citylist = unique(dfi$city)
-n = 15
-par(mfrow=c(4,5))
-for (cityi in citylist[(n*20-19):(n*20)]){
-  dat = dfi[which(dfi$city == cityi & grepl(rangeStat,dfi$index)),]
-  dat = na.omit(dat)
-  if(dim(dat)[1]>0){plot(dat$year, dat$value, main=cityi)}
-}
-
-Outliers = function(cityi0, yeari0, valuei0){
-  dat0 = dfi[which(dfi$city == cityi0 & grepl(rangeStat,dfi$index)),]
-  dat0[order(dat0$year),2:5]
-  dfi[which(dfi$city == cityi0 & grepl(rangeStat,dfi$index) & dfi$year==yeari0),]$value = valuei0
-  dfi
-}
 
 dfi = Outliers('大同市', 1988, 103.79)
 dfi = Outliers('白城市', 1991, 33)
@@ -151,9 +143,16 @@ dfi = Outliers('淮安市', 1995, 46.5)
 dfi = Outliers('丽水市', 2012, 39)
 dfi = Outliers('随州市', 1989, 135)
 dfi = Outliers('湛江市', 1988, 148)
+dfi = Outliers('益阳市', 2002, 126.67)
+dfi = Outliers('百色市', 2012, 34.2)
+dfi = Outliers('湛江市', 1988, 96.8)
+dfi = Outliers('湛江市', 2009, 148.16)
+dfi = Outliers('龙岩市', 2011, 48.03)
+dfi = Outliers('宿州市', 2003, 170.1)
+dfi = Outliers('宿州市', 2004, 171.8)
 
 
-cityi0 = '湛江市'
+cityi0 = '宿州市'
 dat0 = dfi[which(dfi$city == cityi0 & grepl(rangeStat,dfi$index)),]
 dat0[order(dat0$year),2:5]
 
@@ -179,26 +178,6 @@ rangeStat = '市辖区'
 dfname = 'CityRoadArea'
 dfi = get(dfname)
 dfi = dfi[which(grepl('市',dfi$city)),]
-citylist = read.csv(file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/city_info.csv',stringsAsFactors=F)
-citypre = subset(citylist, citylist$Administrative_level != 'county')$City_ch
-n = 15
-par(mfrow=c(4,5))
-for (cityi in citypre[(n*20-19):(n*20)]){
-  dat = dfi[which(dfi$city == cityi & grepl(rangeStat,dfi$index)),]
-  dat = na.omit(dat)
-  if(dim(dat)[1]>0){
-    plot(as.numeric(dat$year)-1, dat$value, main=cityi,xlab='year',ylab=dfname,pch=1, xlim=c(1985,2017))
-  } else {
-    plot(1:5,1:5,main=cityi,xlab='year',ylab=dfname,cex=0)
-  }
-}
-
-Outliers = function(cityi0, yeari0, valuei0){
-  dat0 = dfi[which(dfi$city == cityi0 & grepl(rangeStat,dfi$index)),]
-  dat0[order(dat0$year),2:5]
-  dfi[which(dfi$city == cityi0 & grepl(rangeStat,dfi$index) & dfi$year %in% yeari0),]$value = valuei0
-  dfi
-}
 
 dfi = Outliers('衢州市', 1998, 147)
 dfi = Outliers('宁波市', 2003, NA)
@@ -287,32 +266,11 @@ eval(parse(text=paste0('save(',dfname,",file='C:/Sync/CoolGirl/Fhe/ecosocialDATA
 
 setwd('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL')
 for (rdat in dir()){load(rdat)}
-dflist = gsub('.Rdata', '', dir('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL'))
 
 rangeStat = '市辖区'
 dfname = 'HospitalBerth'
 dfi = get(dfname)
 dfi = dfi[which(grepl('市',dfi$city)),]
-citylist = read.csv(file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/city_info.csv',stringsAsFactors=F)
-citypre = subset(citylist, citylist$Administrative_level != 'county')$City_ch
-n = 15
-par(mfrow=c(4,5))
-for (cityi in citypre[(n*20-19):(n*20)]){
-  dat = dfi[which(dfi$city == cityi & grepl(rangeStat,dfi$index)),]
-  dat = na.omit(dat)
-  if(dim(dat)[1]>0){
-    plot(as.numeric(dat$year)-1, dat$value, main=cityi,xlab='year',ylab=dfname,pch=1, xlim=c(1985,2017))
-  } else {
-    plot(1:5,1:5,main=cityi,xlab='year',ylab=dfname,cex=0)
-  }
-}
-
-Outliers = function(cityi0, yeari0, valuei0){
-  dat0 = dfi[which(dfi$city == cityi0 & grepl(rangeStat,dfi$index)),]
-  dat0[order(dat0$year),2:5]
-  dfi[which(dfi$city == cityi0 & grepl(rangeStat,dfi$index) & dfi$year %in% yeari0),]$value = valuei0
-  dfi
-}
 
 dfi = Outliers('黑河市', 1995, 1106)
 dfi = Outliers('百色市', 2009, 2702)
@@ -344,26 +302,6 @@ rangeStat = '市辖区'
 dfname = 'Green'
 dfi = get(dfname)
 dfi = dfi[which(grepl('市',dfi$city)),]
-citylist = read.csv(file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/city_info.csv',stringsAsFactors=F)
-citypre = subset(citylist, citylist$Administrative_level != 'county')$City_ch
-n = 15
-par(mfrow=c(4,5))
-for (cityi in citypre[(n*20-19):(n*20)]){
-  dat = dfi[which(dfi$city == cityi & grepl(rangeStat,dfi$index)),]
-  dat = na.omit(dat)
-  if(dim(dat)[1]>0){
-    plot(as.numeric(dat$year)-1, dat$value, main=cityi,xlab='year',ylab=dfname,pch=1, xlim=c(1985,2017))
-  } else {
-    plot(1:5,1:5,main=cityi,xlab='year',ylab=dfname,cex=0)
-  }
-}
-
-Outliers = function(cityi0, yeari0, valuei0){
-  dat0 = dfi[which(dfi$city == cityi0 & grepl(rangeStat,dfi$index)),]
-  dat0[order(dat0$year),2:5]
-  dfi[which(dfi$city == cityi0 & grepl(rangeStat,dfi$index) & dfi$year %in% yeari0),]$value = valuei0
-  dfi
-}
 
 dfi = Outliers('玉溪市', 2017, NA)
 dfi = Outliers('齐齐哈尔市', c(2008:2009), NA)
