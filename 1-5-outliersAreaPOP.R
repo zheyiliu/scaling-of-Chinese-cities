@@ -296,7 +296,6 @@ eval(parse(text=paste0('save(',dfname,",file='C:/Sync/CoolGirl/Fhe/ecosocialDATA
 
 setwd('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL')
 for (rdat in dir()){load(rdat)}
-dflist = gsub('.Rdata', '', dir('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL'))
 
 rangeStat = '市辖区'
 dfname = 'Green'
@@ -326,6 +325,158 @@ dfi = Outliers('河池市', 2004, 453)
 dfi = Outliers('梧州市', 2002, 1838)
 
 cityi0 = '梧州市'
+dat0 = dfi[which(dfi$city == cityi0 & grepl(rangeStat,dfi$index)),]
+dat0[order(dat0$year),2:5]
+
+
+assign(dfname, dfi)
+eval(parse(text=paste0('save(',dfname,",file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL/",dfname,".Rdata')")))
+
+
+###############################################################
+###############################################################
+###############################################################
+
+### Salary
+
+setwd('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL')
+for (rdat in dir()){load(rdat)}
+
+rangeStat = '市辖区'
+dfname = 'Salary'
+dfi = get(dfname)
+dfi = dfi[which(grepl('市',dfi$city)),]
+
+dfi = Outliers('临沧市', 2013, 120850)
+dfi = Outliers('朔州市', 2017, 573502)
+dfi = Outliers('潍坊市', 2015, 1866244)
+dfi = Outliers('汉中市', 2006, 93137)
+dfi = Outliers('延安市', 2014, 416024)
+dfi = Outliers('永州市', 2016, 437750)
+dfi = Outliers('永州市', 2001, 58693)
+dfi = Outliers('张家界市', 2009, 84421)
+dfi = Outliers('黄冈市', 2004, 42794)
+dfi = Outliers('黑河市', 1996, 19160)
+dfi = Outliers('衡水市', 2016, 563801)
+dfi = Outliers('遵义市', 2016, 828620)
+dfi = Outliers('北海市', 2011, 247250)
+dfi = Outliers('钦州市', 2011, 257965)
+dfi = Outliers('揭阳市', 2008, 94746)
+dfi = Outliers('天水市', 2007, 153749)
+dfi = Outliers('龙岩市', 2015, 663588)
+dfi = Outliers('漳州市', 2014, 680310)
+dfi = Outliers('马鞍山市', 2014, 836019)
+dfi = Outliers('六安市', 2011, 253444)
+dfi = Outliers('宿州市', 2010:2013, NA)
+
+cityi0 = '宿州市'
+dat0 = dfi[which(dfi$city == cityi0 & grepl(rangeStat,dfi$index)),]
+dat0[order(dat0$year),2:5]
+
+
+assign(dfname, dfi)
+eval(parse(text=paste0('save(',dfname,",file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL/",dfname,".Rdata')")))
+
+
+###############################################################
+###############################################################
+###############################################################
+
+### DepositHousehold 年末居民存款
+
+setwd('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL')
+for (rdat in dir()){load(rdat)}
+
+rangeStat = '市辖区'
+dfname = 'DepositHousehold'
+dfi = get(dfname)
+dfi = dfi[which(grepl('市',dfi$city)),]
+
+iddelf = vector()
+f= dfi[duplicated(dfi[,c(-1,-5)]),]
+for (i in 1:dim(f)[1]){
+  ff = subset(dfi,dfi$city==f$city[i] & dfi$year==f$year[i] & dfi$index==f$index[i])
+  if (sum(is.na(ff$value))==1){iddelf = c(iddelf, ff$id[is.na(ff$value)])
+  }else{iddelf = c(iddelf, ff[order(ff$value),]$id[2])}
+}
+dfi = dfi[which(!dfi$id %in% iddelf),]
+
+dfi = Outliers('宁波市', 2009, 14096303)
+dfi = Outliers('昆明市', 2010, 14109469)
+dfi = Outliers('昆明市', 2012, 21831247)
+dfi = Outliers('朝阳市', 2012, NA)
+dfi = Outliers('通化市', 2007, 816240)
+dfi = Outliers('荆门市', 2009:2010, NA)
+dfi = Outliers('十堰市', 2016:2017, NA)
+dfi = Outliers('黑河市', 2005, 282790)
+dfi = Outliers('南宁市', 2009, 7286542)
+dfi = Outliers('南宁市', 2012, 12441640)
+dfi = Outliers('钦州市', 2012, 1794110)
+dfi = Outliers('汕尾市', 2002, 184582)
+dfi = Outliers('阳江市', 2010, 1501446)
+dfi = Outliers('阳江市', 2013, 2029313)
+dfi = Outliers('河源市', 1999, 270188)
+
+cityi0 = '河源市'
+dat0 = dfi[which(dfi$city == cityi0 & grepl(rangeStat,dfi$index)),]
+dat0[order(dat0$year),2:5]
+
+assign(dfname, dfi)
+eval(parse(text=paste0('save(',dfname,",file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL/",dfname,".Rdata')")))
+
+
+###############################################################
+###############################################################
+###############################################################
+
+### Electricity 全年用电量
+
+setwd('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL')
+for (rdat in dir()){load(rdat)}
+dflist = gsub('.Rdata', '', dir('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL'))
+
+rangeStat = '市辖区'
+dfname = 'Electricity'
+dfi = get(dfname)
+dfi = dfi[which(grepl('市',dfi$city)),]
+
+iddelf = vector()
+f= dfi[duplicated(dfi[,c(-1,-5)]),]
+for (i in 1:dim(f)[1]){
+  ff = subset(dfi,dfi$city==f$city[i] & dfi$year==f$year[i] & dfi$index==f$index[i])
+  if (sum(is.na(ff$value))==1){iddelf = c(iddelf, ff$id[is.na(ff$value)])
+  }else{iddelf = c(iddelf, ff[order(ff$value),]$id[2])}
+}
+dfi = dfi[which(!dfi$id %in% iddelf),]
+
+dfi[which(grepl(rangeStat,dfi$index) & dfi$year %in% 1992),]$value = dfi[which(grepl(rangeStat,dfi$index) & dfi$year %in% 1992),]$value*10000
+
+dfi = Outliers('吐鲁番市', 1988, 4890)
+dfi = Outliers('天津市', 1992, 1148200)
+dfi = Outliers('绵阳市', 2004, 200000)
+dfi = Outliers('广元市', 1998, 90463)
+dfi = Outliers('太原市', 1990, 462100)
+dfi = Outliers('榆林市', 2015, 446080)
+dfi = Outliers('榆林市', 2009, NA)
+dfi = Outliers('长春市', 2004:2005, NA)
+dfi = Outliers('松原市', 1995, NA)
+dfi = Outliers('呼和浩特市', 2011:2012, NA)
+dfi = Outliers('鄂尔多斯市', 2011:2012, NA)
+dfi = Outliers('乌兰察布市', 2016, 153350)
+dfi = Outliers('益阳市', 1994, 29540)
+dfi = Outliers('嘉峪关市', 2016, NA)
+dfi = Outliers('梧州市', 2012, NA)
+dfi = Outliers('滁州市', 2006, 57707)
+dfi = Outliers('克拉玛依市', 2005, 224800)
+dfi = Outliers('嘉峪关市', 2016, NA)
+dfi = Outliers('梧州市', 2012, NA)
+dfi = Outliers('滁州市', 2006, 57707)
+dfi = Outliers('克拉玛依市', 2005, 224800)
+dfi = Outliers('曲靖市', 2010:2012, NA)
+dfi = Outliers('朔州市', 2010, NA)
+dfi = Outliers('咸宁市', 2011, NA)
+
+cityi0 = '池州市'
 dat0 = dfi[which(dfi$city == cityi0 & grepl(rangeStat,dfi$index)),]
 dat0[order(dat0$year),2:5]
 

@@ -38,7 +38,7 @@ normYbeta = (Ybeta-min(Ybeta))/((max(Ybeta)-min(Ybeta)))
 normestYbeta = (estYbeta-min(estYbeta))/((max(estYbeta)-min(estYbeta)))
 
 #############################################
-f = lm(Ybeta~estYbeta)
+f = lm(Ybeta~estYbeta-1)
 ff = summary(f)
 
 
@@ -56,8 +56,10 @@ axis(2, las=1, tck=0.03,mgp=c(0,0.3,0))
 title(xlab="Analytical exponent (β')", mgp=c(1.5,0,0),cex.lab=1.2)
 title(ylab="Empirical exponent (β)", mgp=c(2.5,0,0),cex.lab=1.2)
 abline(a=ff$coefficients[1,1],b=ff$coefficients[2,1],lwd=2)
-legend("topright", c(paste0('R-square=', round(ff$r.squared,3)), 
-                     paste0('P-value=', round(ff$coefficients[2,4],3))),
+abline(a=0,b=ff$coefficients[1,1],lwd=2)
+legend("bottomright", c(paste0('R-square=', round(ff$r.squared,3)), 
+                        paste0('λ =', round(ff$coefficients[1,1],3)), 
+                     paste0('P-value=', round(ff$coefficients[1,4],3))),
        title=paste0(dfname,":"),title.adj=0.2,x.intersp=0.4,y.intersp=0.8, seg.len=0,
        horiz=F, col=rgb(0, 0, 0, 80, maxColorValue=255))
 
@@ -80,7 +82,7 @@ legend("topright", c(paste0('R-square=', round(ff$r.squared,3)),
 #        c('α (Population)', paste0('τ (', dfname,')')))
 
 ### 绘制标准化的α, τ, β的时间动态图
-plot(df1$year-1, normPOPalpha,type='n',lwd=2, col=col1, ylim=c(0,1.2),
+plot(df1$year-1, normPOPalpha,type='n',lwd=2, col=1, ylim=c(0,1.2),
      ann=F, xaxt="n",yaxt="n", mgp=c(2,0,0))
 lines(df1$year-1, normestYbeta,lty=1,lwd=2)
 lines(df1$year-1, normPOPalpha,lty=3,lwd=2, col=2)#绿色

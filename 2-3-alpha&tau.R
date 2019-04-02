@@ -8,8 +8,8 @@ setwd('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL')
 for (rdat in dir()){load(rdat)}
 
 Alpha = function(dfname, rangeStat, yeari, denfun){
-  #dfname='POP'
-  #yeari=1994
+  #dfname='Area'
+  #yeari=1989
   #rangeStat='市辖区'
   #denfun=c('conpl','conlnorm')
   dfi = get(dfname)
@@ -18,13 +18,14 @@ Alpha = function(dfname, rangeStat, yeari, denfun){
   dfi = na.omit(dfi)
   dat = dfi[which(dfi$year == yeari & grepl(rangeStat,dfi$index)),]
   
-  if (max(dat$value)<50000){cs = dat$value
-  } else {cs = dat$value/10000
-  }
   
-  if(length(cs)<50){
-    alla = data.frame(yIndex=paste0(dfname,rangeStat), Alpha=NA, KS_Pvalue=NA, Observation=length(cs), year=yeari)
+  if(length(dat$value)<50){
+    alla = data.frame(yIndex=paste0(dfname,rangeStat), Alpha=NA,xmin_PL=NA, xmin_LN=NA, Lnorm1=NA, Lnorm2=NA, Pks_PL=NA, Pks_LN=NA, Observation=length(dat$value), year=yeari)
   } else {
+    
+    if (max(dat$value)<50000){cs = dat$value
+    } else {cs = dat$value/10000
+    }
     
     #通过实际分布函数与理论分布之间的距离最小化，求出Xmin
     m1=eval(parse(text = paste0(denfun[1], '$new(cs)')))
@@ -104,16 +105,19 @@ AlphaAll = function(dfname0, rangeStat0, yeari0, denfun0){
 POPdf = AlphaAll(dfname0='POP', rangeStat0='市辖区', yeari0=1985:2017, denfun0=c('conpl','conlnorm'))
 GDPdf = AlphaAll(dfname0='GDP', rangeStat0='市辖区', yeari0=1985:2017, denfun0=c('conpl','conlnorm'))
 
-dftau0 = data.frame()
 dflist = gsub('.Rdata', '', dir('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL'))
+dftau0 = data.frame()
 Ydflist = dflist[!grepl('POP', dflist)]
-for (i in length(Ydflist)){
+for (i in 1:length(Ydflist)){
   dfname = Ydflist[i]
   dftau = AlphaAll(dfname0=dfname, rangeStat0='市辖区', yeari0=1985:2017, denfun0=c('conpl','conlnorm'))
   dftau0 = rbind(dftau0, dftau)
 }
-dftau0 = rbind(GDPdf, dftau0)
+#dftau0 = rbind(GDPdf, dftau0)
 save(dftau0, file='C:/Sync/CoolGirl/Fhe/Results/3powerlaw/dftau0.Rdata')
+
+
+
 
 
 

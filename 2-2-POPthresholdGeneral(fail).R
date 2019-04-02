@@ -39,10 +39,124 @@ SearchCorValue = function(ORI, COR){ #找到某指标对应的另一指标的值
 	}
 	return(corValueDF)
 }
+
+
+################################
+################################
+
+### 数据不是随机缺失的，缺失的都是小城市，
+### 这种有偏的缺失会使得样本量对beta值大小有很大的影响，
+### 一些beta的波动实际是由当年样本量过低引起的，
+### 看了一下GDP，其实beta一直都在随着样本量变化，没有稳定下来
+### 现在阈值是挑了180
+
+delcity = c('昌都市','拉萨市','林芝市','日喀则市','山南市','那曲市','三沙市','海东市','儋州市','哈密市','吐鲁番市')
+POP1 = POP[which(!(POP$city %in% delcity)),]
+
+rangeyear = 1985:2017
+rangeStatList=c('市辖区','Districts','BetaD/')
+rangey=dflist
+sumlmHorizontal = data.frame()
+for (yeari in rangeyear){
+  #yeari = 2017
+  rangeStat = rangeStatList[1]
+  POPfocal = na.omit(subset(POP1, grepl(rangeStat, POP1$index) & POP1$year==yeari))
+  POPrank = POPfocal[order(POPfocal$value),]
+  cityrank = POPrank$city
+  if (length(cityrank) != 0){
+    bins = seq(1,length(cityrank),5)
+    for (i in bins){
+      p = POPrank$value[i]
+      cityset = cityrank[c(-1:-i)]
+      
+      POPset = subset(POPfocal, POPfocal$city %in% cityset)
+      Beta = vector()
+      Intercept = vector()
+      Pvalue = vector()
+      BetaLower = vector()
+      BetaUpper = vector()
+      Rsquare = vector()
+      Observation = vector()
+      df = vector()
+      for (yi in 1:length(rangey)){
+        xdfname = 'POPset'
+        ydfname = rangey[yi]
+        year = yeari
+        xdf = get(xdfname)
+        ydf = get(ydfname)
+        if (rangeStat=='建成区'){
+          ORII = xdf[grepl('市辖区', xdf$index) & xdf$year==year,]
+        }else{
+          ORII = xdf[grepl(rangeStat, xdf$index) & xdf$year==year,]
+        }
+        CORR = ydf[grepl(rangeStat, ydf$index) & ydf$year==year,]
+        cordf = SearchCorValue(ORII, CORR)
+        if (sum(is.na(cordf))>=dim(cordf)[1] | dim(na.omit(cordf))[1]<20){
+          Beta[yi] = NA
+          Intercept[yi] = NA
+          Pvalue[yi]=NA
+          BetaLower[yi]=NA
+          BetaUpper[yi]=NA
+          Rsquare[yi]=NA
+          Observation[yi]=NA
+          df[yi]=ydfname
+        }else{
+          data = data.frame(Y = log(cordf$yindex), X = log(cordf$xindex))
+          flm = lm(Y~X, data=data) #1.22
+          #fsma = sma(Y~X, data=data, robust=T) #1.44,1.48
+          #fdeming = deming(Y~X,data=data,cv=T) #1.23
+          
+          Beta[yi] = summary(flm)$coefficients[2,1]
+          Pvalue[yi] = summary(flm)$coefficients[2,4]
+          Rsquare[yi] = summary(flm)$r.squared
+          Observation[yi] = summary(flm)$df[2] + 2
+          df[yi]=ydfname
+          Intercept[yi] = summary(flm)$coefficients[1,1]
+          confident = confint(flm, level=0.95)
+          if (dim(confident)[1]!=2){
+            BetaLower[yi]=NA
+            BetaUpper[yi]=NA
+          }else{
+            BetaLower[yi]=confident[2,1]
+            BetaUpper[yi]=confident[2,2]
+          }
+        }
+      }
+      sumlm = data.frame(yIndex=df, Beta=Beta, Intercept=Intercept, Pvalue=Pvalue, BetaLower=BetaLower, BetaUpper=BetaUpper, Rsquare=Rsquare, Observation=Observation, year=yeari, threshold=p)
+      sumlmHorizontal = na.omit(rbind(sumlmHorizontal, sumlm))
+      print(p)
+    }
+  print(yeari)
+  }
+}
+fn = 'RANKthreshold'
+save(sumlmHorizontal, file=paste('C:/Sync/CoolGirl/Fhe/Results/',fn,'/sumlmThreshold_',rangeStatList[2],'.Rdata',sep=''))
+write.csv(sumlmHorizontal, file=paste('C:/Sync/CoolGirl/Fhe/Results/',fn,'/sumlmThreshold_',rangeStatList[2],'.csv',sep=''))
+for (yname in unique(sumlmHorizontal$yIndex)){
+  for (yeari in unique(sumlmHorizontal$year)){
+    dfBeta = sumlmHorizontal[sumlmHorizontal$yIndex==yname & sumlmHorizontal$year==yeari,]
+    dat = dfBeta
+    png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/',fn,'/',rangeStatList[3],yname, yeari,'.png'),width=15,height=15, units='cm',res=150)
+    pic = ggplot(data=dat, aes(x=Observation, y=Beta)) + 
+      geom_point(size = 2.2, colour='#FF6600') +
+      geom_errorbar(aes(ymin=BetaLower, ymax=BetaUpper), width=.1, colour='#FF6600') +
+      geom_hline(yintercept = c(7/6,1,5/6),alpha=0.4) +
+      labs(x = 'Observation', y='β', title=paste0(gsub(rangeStatList[1], '', yname),'.',rangeStatList[2])) +
+      theme(text = element_text(size=18))
+    print(pic)
+    dev.off()
+  }
+}
+
+
+##################################
+##################################
+
 #Method='POP' or 'PD', reverse=F or T
 Threshold = function(Method='POP',rangeStatList=c('市辖区','Districts','BetaD/'),rangeyear=1985:2017,rangey=dflist,reverse=F,pix=100){
   sumlmHorizontal = data.frame()
   for (yeari in rangeyear){
+    #yeari = 2017
     rangeStat = rangeStatList[1]
     POPdfocal = subset(POPdensity, grepl(rangeStat,POPdensity$index) & POPdensity$year==yeari)
     POPfocal = subset(POP, grepl(rangeStat, POP$index) & POP$year==yeari)
@@ -165,7 +279,7 @@ interactdf = 'BusPassenger市辖区'
 pollutiondf = 'WasteWater全市'
 
 
-setwd(paste0('C:/Sync/CoolGirl/Fhe/Results/POPthresholdReverse'))
+setwd(paste0('C:/Sync/CoolGirl/Fhe/Results/POPthreshold'))
 load(paste0('sumlmHorizontal_',rangeStatList[2],'.Rdata'))
 
 for (yname in unique(sumlmHorizontal$yIndex)){
