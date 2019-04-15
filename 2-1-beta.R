@@ -5,6 +5,7 @@ library(ggplot2)
 
 setwd('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL')
 for (rdat in dir()){load(rdat)}
+
 POP = POP[which(POP$year!=1995),]
 # datname = ls()[!grepl('rdat',ls())]
 # for (i in 1:length(datname)){
@@ -213,7 +214,7 @@ for (yeari in 1985:2017){
 		}
 		CORR = ydf[grepl(rangeStat, ydf$index) & ydf$year==year,]
 		cordf = SearchCorValue(ORII, CORR)
-		if (sum(is.na(cordf))>=dim(cordf)[1] | dim(na.omit(cordf))[1]<180){
+		if (sum(is.na(cordf))>=dim(cordf)[1] | dim(na.omit(cordf))[1]<130){
 			Beta[yi] = NA
 			Intercept[yi] = NA
 			Pvalue[yi]=NA
@@ -225,7 +226,7 @@ for (yeari in 1985:2017){
 			InterceptUpper[yi]=NA
 		}else{
 			data = data.frame(Y = log(cordf$yindex), X = log(cordf$xindex))
-			flm = lm(Y~X, data=data) #1.22
+			flm = lm(Y~X, data=data) #1.22 ##LM比GLM的AIC都小
 			#fsma = sma(Y~X, data=data, robust=T) #1.44,1.48
 			#fdeming = deming(Y~X,data=data,cv=T) #1.23
 		
@@ -415,21 +416,24 @@ rangeStatList = c('市辖区', 'Districts', 'BetaD/')
 setwd(paste0('C:/Sync/CoolGirl/Fhe/Results/',modelname))
 load(paste0('sumlmHorizontal_',rangeStatList[2],'.Rdata'))
 
+### temporal dynamics of each Y
+#sumlmHorizontal = sumlmHorizontal[which(sumlmHorizontal$Rsquare>=0.9),]
 for (yname in unique(sumlmHorizontal$yIndex)){
-dfBeta = sumlmHorizontal[sumlmHorizontal$yIndex==yname,]
-dat = dfBeta
-png(filename=paste0(rangeStatList[3],yname,'.png'),width=15,height=15, units='cm',res=150)
-p = ggplot(data=dat, aes(x=year-1, y=Beta)) + 
-	geom_point(size = 2.2, colour='#FF6600') +
-	geom_errorbar(aes(ymin=BetaLower, ymax=BetaUpper), width=.1, colour='#FF6600') +
-	geom_hline(yintercept = c(7/6,1,5/6),alpha=0.4) +
-	labs(x = 'Year(1984-2016)', y='β', title=paste0(gsub(rangeStat, '', yname),'.',rangeStatList[2])) +
-	theme(text = element_text(size=18))
-print(p)
-dev.off()
+  dfBeta = sumlmHorizontal[sumlmHorizontal$yIndex==yname,]
+  dat = dfBeta
+  png(filename=paste0(rangeStatList[3],yname,'.png'),width=15,height=15, units='cm',res=150)
+  p = ggplot(data=dat, aes(x=year-1, y=Beta)) + 
+    geom_point(size = 2.2, colour='#FF6600') +
+    geom_errorbar(aes(ymin=BetaLower, ymax=BetaUpper), width=.1, colour='#FF6600') +
+    geom_hline(yintercept = c(7/6,1,5/6),alpha=0.4) +
+    labs(x = 'Year(1984-2016)', y='β', title=paste0(gsub(rangeStat, '', yname),'.',rangeStatList[2])) +
+    theme(text = element_text(size=18))
+  print(p)
+  dev.off()
 }
 
-
+### 4 classifications
+col = c("#619CFF", "grey52", "#00BA38", "#F8766D")
 ylists = c('GDP', 'Salary', 'DepositHousehold') #'Book', 'PostTele'
 ylisti = c('CityRoadArea','Hospital')  #'HospitalBerth'
 yliste = c('Electricity', 'Water')
@@ -444,13 +448,15 @@ for (ylist in list(ylists, ylisti, yliste, ylista)){
   p = ggplot(data=dfBeta, aes(x=year-1, y=Beta, color=yIndex,shape=yIndex)) + 
     geom_line(size=1) + geom_point(size=2) +
     geom_errorbar(aes(ymin=BetaLower, ymax=BetaUpper), width=.2, alpha=0.4) +
-    geom_hline(yintercept = c(7/6,1,5/6),alpha=0.7,size=1,color='darkorange') +
+    geom_hline(yintercept = c(2/3,1,5/6,7/6),alpha=0.4, color=col, lwd=1.5) +
+    #geom_hline(yintercept = c(7/6,1,5/6),alpha=0.7,size=1,color='darkorange') +
     labs(x = 'Year(1984-2016)', y='β') +
     theme(
       text = element_text(size=18),
       panel.background = element_rect(fill = "transparent",colour = 'black'), 
       panel.grid.minor = element_line(color='azure3'), 
       panel.grid.major = element_line(color='azure3'),
+      legend.key = element_rect(fill = "transparent", color = "transparent"), 
       #plot.background = element_rect(fill = "transparent",colour = NA),
       legend.title=element_blank()
     )
@@ -458,65 +464,55 @@ for (ylist in list(ylists, ylisti, yliste, ylista)){
   dev.off()
 }
 
+
+
+### comparing betas of different years
+
 #经济 #基建 #个人需要
-economoicdf = c('Book','BusPassenger','DepositHousehold','GDP','Loan','Salary','PostTele','WasteWater')
-infrasdf = c('CityRoadArea','Hospital','School','Bus','Cinema','Green','HospitalBerth','GreenBuilt')
+col = c("#619CFF", "grey52", "#00BA38", "#F8766D")
+economoicdf = c('Book','BusPassenger','DepositHousehold','GDP','Loan','Salary','PostTele','WasteWater','Bus')
+infrasdf = c('CityRoadArea','Hospital','School','Cinema','Green','HospitalBerth','GreenBuilt')
 needdf = c('Electricity','Water')
 areadf = c('Area', 'AreaBuilt')
 
-yearii = 2017
 sumlmHorizontal$type=NA
 sumlmHorizontal[sumlmHorizontal$yIndex %in% economoicdf,]$type = 'socio-economic'
 sumlmHorizontal[sumlmHorizontal$yIndex %in% infrasdf,]$type = 'infrastructure'
 sumlmHorizontal[sumlmHorizontal$yIndex %in% needdf,]$type = 'individual need'
 sumlmHorizontal[sumlmHorizontal$yIndex %in% areadf,]$type = 'Area'
-dfBeta = sumlmHorizontal[sumlmHorizontal$year==yearii & !is.na(sumlmHorizontal$type),]
-dfBeta = dfBeta[order(dfBeta$Beta),]
-dfBeta$yIndex = as.character(dfBeta$yIndex)
 
-png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/',modelname,'/',yearii-1,'AllTemporal.png'),
-    width=17,height=15, units='cm',res=180)
-p = ggplot(data=dfBeta, aes(x=reorder(yIndex,Beta), y=Beta, color=type)) + 
-	geom_point(size = 2.2) +
-	geom_errorbar(aes(ymin=BetaLower, ymax=BetaUpper), width=.1,alpha=0.8) +
-	geom_hline(yintercept = c(7/6,1,5/6),alpha=0.4) +
-	labs(x = paste0('Urban attributes (', yearii-1, ')'), y='β') +
-	theme(text = element_text(size=18),
-	legend.title=element_blank(),
-	axis.text.x = element_text(angle = 90, hjust = 0.5, vjust = 0.5))
-print(p)
-dev.off()
+yearlist = c(1988, 1998, 2008, 2017)
+dfBeta = sumlmHorizontal[sumlmHorizontal$year %in% yearlist & !is.na(sumlmHorizontal$type),]
+ymina = min(dfBeta$BetaLower)
+ymaxa = max(dfBeta$BetaUpper)
 
-yearii = 1988
-sumlmHorizontal$type=NA
-sumlmHorizontal[sumlmHorizontal$yIndex %in% economoicdf,]$type = 'socio-economic'
-sumlmHorizontal[sumlmHorizontal$yIndex %in% infrasdf,]$type = 'infrastructure'
-sumlmHorizontal[sumlmHorizontal$yIndex %in% needdf,]$type = 'individual need'
-sumlmHorizontal[sumlmHorizontal$yIndex %in% areadf,]$type = 'Area'
-dfBeta = sumlmHorizontal[sumlmHorizontal$year==yearii & !is.na(sumlmHorizontal$type),]
-dfBeta = dfBeta[order(dfBeta$Beta),]
-dfBeta$yIndex = as.character(dfBeta$yIndex)
-
-png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/',modelname,'/',yearii-1,'AllTemporal.png'),
-    width=17,height=15, units='cm',res=180)
-p = ggplot(data=dfBeta, aes(x=reorder(yIndex,Beta), y=Beta, color=type)) + 
-  geom_point(size = 2.2) +
-  geom_errorbar(aes(ymin=BetaLower, ymax=BetaUpper), width=.1,alpha=0.8) +
-  geom_hline(yintercept = c(7/6,1,5/6),alpha=0.4) +
-  labs(x = paste0('Urban attributes (', yearii-1, ')'), y='β') +
-  theme(text = element_text(size=18),
-        legend.title=element_blank(),
-        axis.text.x = element_text(angle = 90, hjust = 0.5, vjust = 0.5))
-print(p)
-dev.off()
+for (yearii in yearlist){
+  dfBeta1 = dfBeta[dfBeta$year == yearii,]
+  dfBeta2 = dfBeta1[order(dfBeta1$year, dfBeta1$Beta),]
+  
+  png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/',modelname,'/',yearii-1,'AllTemporal.png'),
+      width=17,height=15, units='cm',res=180)
+  p = ggplot(data=dfBeta2, aes(x=reorder(yIndex,Beta), y=Beta, color=type)) + 
+    ylim(ymina, ymaxa) +
+    scale_colour_manual(values = col) +
+    geom_point(size = 2.2) +
+    geom_errorbar(aes(ymin=BetaLower, ymax=BetaUpper), width=.1,alpha=0.8) +
+    geom_hline(yintercept = c(2/3,1,5/6,7/6),alpha=0.4, color=col, lwd=1.5) +
+    labs(x = paste0('Urban attributes (', yearii-1, ')'), y='β') +
+    theme(text = element_text(size=18),
+          legend.title=element_blank(),
+          panel.grid =element_blank(),                                             #默认主题
+          panel.background = element_rect(fill = "transparent",colour = 'black'),  #默认主题
+          legend.key = element_rect(fill = "transparent", color = "transparent"),  #默认主题
+          #axis.line = element_line(colour = "black"),
+          axis.text.x = element_text(angle = 90, hjust = 0.5, vjust = 0.5))
+  print(p)
+  dev.off()
+}
 
 
-
-###############################
-modelname='OLS'
+############################### temporal dynamics of intercept
 rangeStatList = c('市辖区', 'Districts', 'InterceptD/')
-setwd(paste0('C:/Sync/CoolGirl/Fhe/Results/',modelname))
-load(paste0('sumlmHorizontal_',rangeStatList[2],'.Rdata'))
 
 for (yname in unique(sumlmHorizontal$yIndex)){
   dfBeta = sumlmHorizontal[sumlmHorizontal$yIndex==yname,]

@@ -1,3 +1,43 @@
+#####处理常住人口数据
+df2000 = read.csv('C:\\Sync\\CoolGirl\\Fhe\\ecosocialDATA\\原始数据\\人口普查常住人口\\2000POPall.csv', header=T, stringsAsFactors = FALSE, colClasses='character')
+df2010 = read.csv('C:\\Sync\\CoolGirl\\Fhe\\ecosocialDATA\\原始数据\\人口普查常住人口\\2010POPall.csv', header=T, stringsAsFactors = FALSE, colClasses='character')
+
+#for (p in 2:dim(dat)[2]){dat[,p] = gsub(' ', '', dat[,p])}
+#write.csv(dat, "C:\\Sync\\CoolGirl\\Fhe\\ecosocialdata\\原始数据\\人口普查常住人口\\1990人口普查分县资料_按户口分1.csv")
+love = function(yeari){
+  df1990 = read.csv(file=paste0('C:\\Sync\\CoolGirl\\Fhe\\ecosocialDATA\\原始数据\\人口普查常住人口\\',yeari,'POPall.csv'), 
+                    header=T, stringsAsFactors = FALSE, colClasses='character')
+  df1990$city = gsub('浑江市', '白山市', df1990$city)
+  for (p in 1:dim(df1990)[2]){df1990[,p] = gsub(' ', '', df1990[,p])}
+  citydf = unique(df1990$city)
+  citylist = read.csv(file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/city_info.csv',stringsAsFactors=F)
+  citypre = subset(citylist, citylist$Administrative_level != 'county')$City_ch
+  citycoun = subset(citylist, citylist$Administrative_level == 'county')$City_ch
+  cityqu = read.csv(file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/ToDistrict.csv',stringsAsFactors=F)[,1]
+  citydel = citydf[!citydf %in% citypre & citydf %in% c(citycoun,cityqu)]
+  df = subset(df1990, !df1990$city %in% citydel & df1990$level=='地级市')[,1:2]
+  colnames(df) = c('city','value')
+  df$index = '常住人口.人.市辖区'
+  df$year = yeari
+  let = letters[sample(26,dim(df)[1],replace=T)]
+  df$id = paste(df$city, df$year, df$index, let, sep='-')
+  return(df)
+}
+df1 = love(1990)
+df2 = love(2000)
+df3 = love(2010)
+
+Resident = rbind(df1,df2,df3)
+Resident$value = as.numeric(Resident$value)
+Resident$year = as.character(Resident$year)
+save(Resident,file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL/POPResident.Rdata')
+#write.csv(Resident, file="C:\\Sync\\CoolGirl\\Fhe\\ecosocialdata\\原始数据\\人口普查常住人口\\POPResident.csv",row.names=F)
+
+
+
+
+
+
 ###清洗表格
 #indexclass = '建设用地'
 #filename = paste(book, year, indexclass, sep='-')

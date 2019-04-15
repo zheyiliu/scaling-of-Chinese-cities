@@ -1,7 +1,7 @@
 library(ggplot2)
 #library(MASS)
 #library(actuar)
-#library(fitdistrplus)
+library(fitdistrplus)
 library(poweRlaw)
 
 setwd('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL')
@@ -121,49 +121,142 @@ save(dftau0, file='C:/Sync/CoolGirl/Fhe/Results/3powerlaw/dftau0.Rdata')
 
 
 
-# dfname = 'GDP'
+# dfname = 'POP'
 # rangeStat='市辖区'
-# yeari = 1986
+# dfi = get(dfname)
+# delcity = c('昌都市','拉萨市','林芝市','日喀则市','山南市','那曲市','三沙市','海东市','儋州市')
+# dfi = dfi[which(!(dfi$city %in% delcity)),]
+# dfi = na.omit(dfi)
+# 
+# n = length(1985:2017)
+# 
+# pl.pyc.scale = c(1:n)
+# pl.pyc.shape = c(1:n)
+# pl.pyc.P = c(1:n)
+# pl.pyc.pvalue = c(1:n)
+# 
+# powerlaw.scale = c(1:n)
+# powerlaw.shape = c(1:n)
+# powerlaw.pvalue = c(1:n)
+# powerlaw.P = c(1:n)
+# 
+# weibull.scale = c(1:n)
+# weibull.shape = c(1:n)
+# weibull.pvalue = c(1:n)
+# weibull.P = c(1:n)
+# 
+# lnorm.meanlog = c(1:n)
+# lnorm.sdlog = c(1:n)
+# lnorm.pvalue = c(1:n)
+# lnorm.P = c(1:n)
 # 
 # 
+# for (i in c(1:n)){
+#   yeari = c(1985:2017)[i]
+#   dat = dfi[which(dfi$year == yeari & grepl(rangeStat,dfi$index)),]
+#   
+#   if(length(dat$value)<50){
+#     alla = data.frame(yIndex=paste0(dfname,rangeStat), Alpha=NA,xmin_PL=NA, xmin_LN=NA, Lnorm1=NA, Lnorm2=NA, Pks_PL=NA, Pks_LN=NA, Observation=length(dat$value), year=yeari)
+#   } else {
+#     
+#     if (max(dat$value)<50000){cs = dat$value
+#     } else {cs = dat$value/10000
+#     }
+#     
+#     
+#     fl = fitdistr(cs, 'log-normal')
+#     ltest = ks.test(cs, 'plnorm', meanlog = fl$estimate[1], sdlog = fl$estimate[2])
+#     fw = fitdistr(cs, 'weibull')
+#     wtest = ks.test(cs,"pweibull", scale=fw$estimate[2], shape=fw$estimate[1])
+#     
+#     s = 500
+#     xfit = seq(min(cs),max(cs),length.out=s)
+#     himids = hist(cs, xfit, plot=F)$mids
+#     hidensity = hist(cs, xfit, plot=F)$density
+#     pyc = rev(cumsum(rev(hidensity)))
+#     
+#     png(file=paste0('C:/Sync/CoolGirl/Fhe/Results/3powerlaw/newPL/',dfname,yeari,'.png'),width = 480, height = 480, units = "px")
+#     lwd = 2
+#     hist(cs,breaks=s,main=NA,freq=F,xlab=NA,border=NA,col='grey86')
+#     #hist(cs,breaks=s,freq=F)
+#     #lines(himids, hidensity,col='red')
+#     #plot(log(himids), log(hidensity))
+#     plot(log(himids), log(pyc))
+#     
+#     fit1 = lm(log(pyc)~log(himids))
+#     sum1 = summary(fit1)
+#     a=sum1$coefficients[1,1]
+#     b=sum1$coefficients[2,1]
+#     abline(a, b, col='red')
+#     b1 = b-1
+#     a1 = (-1)*a*b
+#     
+#     fit2 = lm(log(hidensity+1)~log(himids))
+#     sum2 = summary(fit2)
+#     a=sum2$coefficients[1,1]
+#     b=sum2$coefficients[2,1]
+#     #abline(a, b, col='red')
+#     b1 = b-1
+#     a1 = (-1)*a*b
+#     
+#     fpp = nls(hidensity~a*himids^b,start=list(a=0.4,b=-1))
+#     fp = summary(fpp)
+#     scalefit = fp$parameters[1]
+#     shapefit = fp$parameters[2]
+#     ypowl = scalefit*xfit^shapefit
+#     curve(scalefit*x^shapefit,col='turquoise3',lwd=2,add=T)
+#     curve(a1*x^b1,col='red',add=T)
+#     pp = scalefit*himids^shapefit
+#     ptest = ks.test(hidensity, pp)
+#     
+#     ywei = dweibull(xfit,scale=fw$estimate[2], shape=fw$estimate[1])
+#     ylnorm = dlnorm(xfit, meanlog=fl$estimate[1], sdlog=fl$estimate[2])
+#     
+#     lines(xfit, ylnorm, col=4,lwd=2)
+#     lines(xfit, ywei, col=2,lwd=2)
+#     dev.off()
+#     
+#     pl.pyc.scale[i] = a1
+#     pl.pyc.shape[i] = b1
+#     f = sum1$fstatistic
+#     pl.pyc.P[i] = pf(as.numeric(f[1]), as.numeric(f[2]), as.numeric(f[3]), lower.tail = FALSE)
+#     pl.pyc.pvalue[i] = 1 * (ltest$p.value>0.05)
+#     
+#     powerlaw.scale[i] = scalefit
+#     powerlaw.shape[i] = shapefit
+#     powerlaw.pvalue[i] = 1 * (ptest$p.value>0.05)
+#     powerlaw.P[i] = ptest$p.value
+#     
+#     weibull.scale[i] = fw$estimate[2]
+#     weibull.shape[i] = fw$estimate[1]
+#     weibull.P[i] = wtest$p.value
+#     weibull.pvalue[i] = 1 * (wtest$p.value>0.05)
+#     
+#     lnorm.meanlog[i] = fl$estimate[1]
+#     lnorm.sdlog[i] = fl$estimate[2]
+#     lnorm.P[i] = ltest$p.value
+#     lnorm.pvalue[i] = 1 * (ltest$p.value>0.05)
+#   }
+# }
 # 
-# fl = fitdistr(cs, 'log-normal')
-# ltest = ks.test(cs, 'plnorm', meanlog = fl$estimate[1], sdlog = fl$estimate[2])
-# fg = fitdistr(cs, 'gamma')
-# gtest = ks.test(cs, 'pgamma', fg$estimate[1], fg$estimate[2])
-# fw = fitdistr(cs, 'weibull')
-# wtest = ks.test(cs,"pweibull", scale=fw$estimate[2], shape=fw$estimate[1])
+# parameter = data.frame(
+#   sp.code = sp,
+#   pl.pyc.scale = pl.pyc.scale,
+#   pl.pyc.shape = pl.pyc.shape,
+#   powerlaw.scale = powerlaw.scale,
+#   powerlaw.shape = powerlaw.shape,
+#   weibull.scale = weibull.scale,
+#   weibull.shape = weibull.shape,
+#   lnorm.meanlog = lnorm.meanlog,
+#   lnorm.sdlog = lnorm.sdlog,
+#   pl.pyc.P = pl.pyc.P,
+#   powerlaw.P = powerlaw.P,
+#   weibull.P = weibull.P,
+#   lnorm.P = lnorm.P,
+#   pl.pyc.sig = pl.pyc.pvalue,
+#   weibull.sig = weibull.pvalue,
+#   lnorm.sig = lnorm.pvalue,
+#   powerlaw.sig = powerlaw.pvalue
+# )
 # 
-# s = 500
-# xfit = seq(min(cs),max(cs),length.out=s)
-# himids = hist(cs, xfit, plot=F)$mids
-# hidensity = hist(cs, xfit, plot=F)$density
-# pyc = rev(cumsum(rev(hidensity)))
-# 
-# #par(mfrow=c(3,1))
-# hist(cs,breaks=s,freq=F)
-# #lines(himids, hidensity,col='red')
-# #plot(log(himids), log(hidensity))
-# #plot(log(himids), log(pyc))
-# 
-# fit1 = lm(log(pyc)~log(himids))
-# sum1 = summary(fit1)
-# a=sum1$coefficients[1,1]
-# b=sum1$coefficients[2,1]
-# #abline(a, b, col='red')
-# alpha = a + 1
-# 
-# fpp = nls(hidensity~a*himids^(-b),start=list(a=0.4,b=1))
-# fp = summary(fpp)
-# scalefit = fp$parameters[1]
-# shapefit = (-1)*fp$parameters[2]
-# ypowl = scalefit*xfit^shapefit
-# curve(scalefit*x^shapefit,col='turquoise3',lwd=2,add=T)
-# pp = scalefit*himids^shapefit
-# ptest = ks.test(hidensity, pp)
-# 
-# ywei = dweibull(xfit,scale=fw$estimate[2], shape=fw$estimate[1])
-# ylnorm = dlnorm(xfit, meanlog=fl$estimate[1], sdlog=fl$estimate[2])
-# 
-# lines(xfit, ylnorm, col=4,lwd=2,add=T)
-# lines(xfit, ywei, col=2,lwd=2,add=T)
+# write.csv(parameter, file=paste0('C:/Sync/CoolGirl/Fhe/Results/3powerlaw/newPL/',dfname,yeari,'.csv'))
