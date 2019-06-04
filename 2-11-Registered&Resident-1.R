@@ -23,7 +23,6 @@ foo[foo$yIndex %in% areadf,]$type = 'Area'
 
 a = lm(foo$Beta.x~foo$Beta.y-1) #x是常住人口，y是户籍人口， x常住人口~y户籍人口
 aa = summary(a)
-at = t.test(foo$Beta.x, foo$Beta.y, paired=T)
 text = paste0('y=', round(aa$coefficients[1,1],3), 'x, R^2=', round(aa$r.squared,3))
 #text = paste0('y=', round(aa$coefficients[2,1],3), 'x+', round(aa$coefficients[1,1],3), ', R^2=', round(aa$r.squared,3))
 
@@ -45,7 +44,7 @@ p1 = ggplot(data=foo, aes(x=Beta.y, y=Beta.x, color=type)) +
         panel.background = element_rect(fill = "transparent",colour = 'black'),  #默认主题
         legend.key = element_rect(fill = "transparent", color = "transparent"),  #默认主题
         #axis.line = element_line(colour = "black"),
-        axis.text.x = element_text(angle = 90, hjust = 0.7, vjust = 0.5))
+        axis.text.x = element_text(angle = 0, hjust = 0.7, vjust = 0.5))
 print(p1)
 dev.off()
 
@@ -73,7 +72,7 @@ p2 = ggplot(data=foo, aes(x=Intercept.y, y=Intercept.x, color=type)) +
         panel.background = element_rect(fill = "transparent",colour = 'black'),  #默认主题
         legend.key = element_rect(fill = "transparent", color = "transparent"),  #默认主题
         #axis.line = element_line(colour = "black"),
-        axis.text.x = element_text(angle = 90, hjust = 0.7, vjust = 0.5))
+        axis.text.x = element_text(angle = 0, hjust = 0.7, vjust = 0.5))
 print(p2)
 dev.off()
 
@@ -106,11 +105,11 @@ p3 = ggplot(data=foo, aes(x=Rsquare.y, y=Rsquare.x, color=type)) +
         panel.background = element_rect(fill = "transparent",colour = 'black'),  #默认主题
         legend.key = element_rect(fill = "transparent", color = "transparent"),  #默认主题
         #axis.line = element_line(colour = "black"),
-        axis.text.x = element_text(angle = 90, hjust = 0.7, vjust = 0.5))
+        axis.text.x = element_text(angle = 0, hjust = 0.7, vjust = 0.5))
 print(p3)
 dev.off()
 
-ggplot2.multiplot(p1,p2,p3, cols=3)
+#ggplot2.multiplot(p1,p2,p3, cols=3)
 
 
 #########################################################
@@ -196,12 +195,12 @@ text = paste0('y=', round(aa1$coefficients[1,1],3), 'x', ', R^2=', round(aa1$r.s
 
 
 png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/OLS_R/ResidentVSPOP.png'),width=15,height=15, units='cm',res=150)
-p3 = ggplot(data=cordf, aes(x=log(yindex), y=log(xindex), color=year)) + 
+p0 = ggplot(data=cordf, aes(x=log(yindex), y=log(xindex), color=year)) + 
   #scale_colour_manual(values = col) +
   #geom_abline(slope=1,intercept=rc,size=1,col='grey') +
   #geom_abline(slope=aa$coefficients[2,1],intercept=aa$coefficients[1,1], size=1) +
   geom_abline(slope=aa1$coefficients[1,1], size=1) +
-  geom_point(size = 3, alpha=0.6) +
+  geom_point(size = 3.5, alpha=0.6) +
   labs(x='Registered Population (log)', y='Resident Population (log)') +
   scale_colour_hue(text) + 
   theme(text = element_text(size=20),
@@ -212,8 +211,8 @@ p3 = ggplot(data=cordf, aes(x=log(yindex), y=log(xindex), color=year)) +
         panel.background = element_rect(fill = "transparent",colour = 'black'),  #默认主题
         legend.key = element_rect(fill = "transparent", color = "transparent"),  #默认主题
         #axis.line = element_line(colour = "black"),
-        axis.text.x = element_text(angle = 90, hjust = 0.7, vjust = 0.5))
-print(p3)
+        axis.text.x = element_text(angle = 0, hjust = 0.7, vjust = 0.5))
+print(p0)
 dev.off()
 
 cordf1 = na.omit(cordf)
@@ -223,3 +222,9 @@ respoint1 = data.frame(city=cordf1$city, year=cordf1$year, Resident=cordf1$xinde
 resorder1 = respoint1[order(respoint1$res,decreasing=T),]
 write.csv(resorder1, file='C:/Sync/CoolGirl/Fhe/Results/OLS_R/ResOrder.csv')
 write.csv(resorder, file='C:/Sync/CoolGirl/Fhe/Results/OLS_R/ResOrder2.csv')
+
+library(ggpubr)
+
+png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/OLS_R/arrange1.png'),width=30,height=30, units='cm',res=300)
+ggarrange(p0,p1,p2,p3,ncol=2,nrow=2,labels=c("A","B","C","D"))
+dev.off()

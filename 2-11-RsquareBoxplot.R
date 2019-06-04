@@ -6,6 +6,9 @@ RB = RB0[which(RB0$Observation > 180),c(2,3,4,10,12)]
 PB = PB0[which(PB0$year %in% unique(RB0$year) & PB0$Observation > 180),c(2,3,4,10,12)]
 RB$R = 'Resident'
 PB$R = 'Registered'
+
+PRBr = rbind(RB,PB)
+
 foo = merge(RB,PB,by=c('yIndex','year'),all=T)
 foo = foo[which(foo$yIndex!='Passenger'),]
 
