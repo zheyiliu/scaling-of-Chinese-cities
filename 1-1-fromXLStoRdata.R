@@ -3,6 +3,8 @@ library(readxl)
 setwd('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/alldata/')
 yearall = dir()
 
+
+#### 以标题名重命名
 for (yeari in yearall){
   setwd(paste0('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/alldata/',yeari,'/csv/'))
   fileall = dir()
@@ -24,7 +26,7 @@ for (yeari in yearall){
   }
 }
 
-
+#### 找出多个sheet的xls
 troublelist = vector()             
 for (yeari in yearall){
   setwd(paste0('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/alldata/',yeari,'/csv/'))
@@ -43,6 +45,7 @@ for (yeari in yearall){
   }
 }
 
+### 只有一个sheet的xls
 safelist = vector()
 for (yeari in yearall){
   setwd(paste0('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/alldata/',yeari,'/csv/'))
@@ -73,6 +76,7 @@ for (yeari in yearall){
 # }
 
 
+#### 找出sheet1中有多张表格的xls
 tellme = vector()
 for (t in 1:length(troublelist)){
   tt = strsplit(troublelist[t],',')[[1]]
@@ -95,7 +99,7 @@ for (t in 1:length(troublelist)){
   }
 }
 
-
+#### 把多个sheet的xls的sheet都拼成sheet1
 for (t in 1:length(troublelist)){
   tt = strsplit(troublelist[t],',')[[1]]
   yeari = tt[1]
@@ -115,6 +119,7 @@ for (t in 1:length(troublelist)){
   write.csv(tst, file=paste0('C:/Sync/CoolGirl/Fhe/ecosocialdata/原始数据/DataForCal/super-',fn),row.names=F)
 }
 
+#### 把其他xls也保存为csv格式
 for (t in 1:length(safelist)){
   tt = strsplit(safelist[t],';')[[1]]
   yeari = tt[1]

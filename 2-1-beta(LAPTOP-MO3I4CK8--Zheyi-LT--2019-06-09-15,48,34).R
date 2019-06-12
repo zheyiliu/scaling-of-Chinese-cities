@@ -3,13 +3,10 @@ library(ggplot2)
 #library(tls)
 #library(deming)
 
-home = '/home/zheyi'
-#home = 'C:/Sync/CoolGirl'
-
-setwd(paste0(home,'/ecosocialData/indexSQL'))
+setwd('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL')
 for (rdat in dir()){load(rdat)}
 
-dflist0 = gsub('.Rdata', '', dir('C:/Sync/CoolGirl/Fhe/ecosocialData/indexSQL'))
+dflist0 = gsub('.Rdata', '', dir('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL'))
 for (yi in 1:length(dflist0)){
   dfname = dflist0[yi]
   df = get(dfname)
@@ -21,7 +18,7 @@ for (yi in 1:length(dflist0)){
   print(yi)
 }
 
-setwd(paste0(home,'/ecosocialData/indexSQL'))
+setwd('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL')
 for (rdat in dir()){load(rdat)}
 
 # datname = ls()[!grepl('rdat',ls())]
@@ -161,17 +158,16 @@ IDDELF = function(ddat){
   iddelf = vector()
   wield = paste0(ddat[,2], ddat[,3], ddat[,4])
   f= ddat[duplicated(wield),]
-  if (nrow(f)>0){
-	for (i in 1:dim(f)[1]){
-		ff = subset(ddat,ddat$city==f$city[i] & ddat$year==f$year[i] & ddat$index==f$index[i])
-		if (sum(is.na(ff$value))==1){iddelf = c(iddelf, ff$id[is.na(ff$value)])
-		}else{iddelf = c(iddelf, ff$id[1])}
-	}
-  ddat = ddat[which(!ddat$id %in% iddelf),]
+  for (i in 1:dim(f)[1]){
+    ff = subset(ddat,ddat$city==f$city[i] & ddat$year==f$year[i] & ddat$index==f$index[i])
+    if (sum(is.na(ff$value))==1){iddelf = c(iddelf, ff$id[is.na(ff$value)])
+    }else{iddelf = c(iddelf, ff$id[1])}
   }
+  ddat = ddat[which(!ddat$id %in% iddelf),]
   return(ddat)
 }
 
+uniindex = unique(dfnew$index)
 
 SearchCorValue = function(ORI, COR){ #找到某指标对应的另一指标的值
 	ORI = IDDELF(ORI)
@@ -186,7 +182,7 @@ SearchCorValue = function(ORI, COR){ #找到某指标对应的另一指标的值
 			corV = NA}
 		if (length(corV)>1){
 			print(corrr)
-			corV = corV[!is.na(corV)][1]}
+			corV = corV[1]}
 		corValue[i100i] = corV
 	}
 	if (length(ORI$value)==0){
@@ -198,7 +194,8 @@ SearchCorValue = function(ORI, COR){ #找到某指标对应的另一指标的值
 }
 
 
-dflist = gsub('.Rdata', '', dir(paste0(home,'/ecosocialData/indexSQL')))
+dflist = gsub('.Rdata', '', dir('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL'))
+#dflist = gsub('.Rdata', '', dir('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL'))
 
 ############## OLS
 sumlmHorizontal = data.frame()
@@ -227,7 +224,7 @@ for (yeari in 1985:2017){
 		year = yeari
 		xdf = get(xdfname)
 		#delcity = c('昌都市','拉萨市','林芝市','日喀则市','山南市','那曲市','三沙市','海东市','儋州市','哈密市','吐鲁番市')
-		#xdf = xdf[which(!(xdf$city %in% delcity)),]
+		xdf = xdf[which(!(xdf$city %in% delcity)),]
 		ydf = get(ydfname)
 		if (rangeStat=='建成区'){
 			ORII = xdf[grepl('市辖区', xdf$index) & xdf$year==year,]
@@ -272,7 +269,7 @@ for (yeari in 1985:2017){
 
 			xlab = paste0(unique(ORII$index),' (log)')
 			ylab = paste0(unique(CORR$index),' (log)')
-			png(filename=paste0(home,'/Results/',modelname,'/',rangeStatList[2],'/',year,ydfname,rangeStat,'.png'),width=15,height=15, units='cm',res=150)
+			png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/',modelname,'/',rangeStatList[2],'/',year,ydfname,rangeStat,'.png'),width=15,height=15, units='cm',res=150)
 			g = ggplot(data=cordf, aes(x=log(xindex), y=log(yindex))) + 
 				geom_point(size = 2.2, colour='#336699', alpha=0.4) +
 				geom_smooth(method = 'lm') + 
@@ -287,8 +284,8 @@ for (yeari in 1985:2017){
 	sumlm = data.frame(yIndex=dflist, Beta=Beta, Intercept=Intercept, Pvalue=Pvalue, BetaLower=BetaLower, BetaUpper=BetaUpper, InterceptLower=InterceptLower, InterceptUpper=InterceptUpper, Rsquare=Rsquare, Observation=Observation, year=yeari)
 	sumlmHorizontal = na.omit(rbind(sumlmHorizontal, sumlm))
 }
-save(sumlmHorizontal, file=paste(home,'/Results/',modelname,'/sumlmHorizontal_',rangeStatList[2],'.Rdata',sep=''))
-write.csv(sumlmHorizontal, file=paste(home,'/Results/', modelname,'/sumlmHorizontal_',rangeStatList[2],'.csv',sep=''))
+save(sumlmHorizontal, file=paste('C:/Sync/CoolGirl/Fhe/Results/',modelname,'/sumlmHorizontal_',rangeStatList[2],'.Rdata',sep=''))
+write.csv(sumlmHorizontal, file=paste('C:/Sync/CoolGirl/Fhe/Results/', modelname,'/sumlmHorizontal_',rangeStatList[2],'.csv',sep=''))
 
 
 
@@ -435,7 +432,7 @@ write.csv(sumlmHorizontal, file=paste(home,'/Results/', modelname,'/sumlmHorizon
 modelname='OLS'
 rangeStatList = c('市辖区', 'Districts', 'BetaD/')
 ###rangeStatList = c('建成区', 'Built', 'BetaB/')
-setwd(paste0(home,'/Results/',modelname))
+setwd(paste0('C:/Sync/CoolGirl/Fhe/Results/',modelname))
 load(paste0('sumlmHorizontal_',rangeStatList[2],'.Rdata'))
 
 ### temporal dynamics of each Y
@@ -465,7 +462,7 @@ for (ylist in list(ylists, ylisti, yliste, ylista)){
   ###dfBeta = sumlmHorizontal[which(sumlmHorizontal$yIndex %in% ylist & !sumlmHorizontal$year %in% c(1989, 1995,1985)),]
   dfBeta = sumlmHorizontal[which(sumlmHorizontal$yIndex %in% ylist),]
   dfBeta$yIndex = as.character(dfBeta$yIndex)
-  png(filename=paste0(home, '/Results/',modelname,'/',ylist[1],'BetaTemporal.png'),
+  png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/',modelname,'/',ylist[1],'BetaTemporal.png'),
       width=32,height=13, units='cm',res=180)
   p = ggplot(data=dfBeta, aes(x=year-1, y=Beta, color=yIndex,shape=yIndex)) + 
     geom_line(size=1) + geom_point(size=2) +
@@ -512,7 +509,7 @@ for (yearii in yearlist){
   dfBeta1 = dfBeta[dfBeta$year == yearii,]
   dfBeta2 = dfBeta1[order(dfBeta1$year, dfBeta1$Beta),]
   
-  png(filename=paste0(home,'/Results/',modelname,'/',yearii-1,'AllTemporal.png'),
+  png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/',modelname,'/',yearii-1,'AllTemporal.png'),
       width=17,height=15, units='cm',res=180)
   p = ggplot(data=dfBeta2, aes(x=reorder(yIndex,Beta), y=Beta, color=type)) + 
     ylim(ymina, ymaxa) +

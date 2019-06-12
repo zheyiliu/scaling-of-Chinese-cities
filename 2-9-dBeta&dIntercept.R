@@ -4,14 +4,14 @@ rangeStatList = c('市辖区', 'Districts', 'BetaD/')
 setwd(paste0('C:/Sync/CoolGirl/Fhe/Results/',modelname))
 load(paste0('sumlmHorizontal_',rangeStatList[2],'.Rdata'))
 
-upyear = c(1992:1996,1999:2004)
-upyear = 1985:2017
-upyear = upyear + 1
-upyear0 = gdpdf$year[gdpdf$year %in% upyear]
-
-gdpdf = sumlmHorizontal[which(sumlmHorizontal$yIndex=='GDP市辖区'),]
+gdpdf = sumlmHorizontal[which(sumlmHorizontal$yIndex=='GDP'),]
 gdpdf = na.omit(gdpdf)
 gdpdf$year = as.numeric(gdpdf$year)
+
+#upyear = c(1992:1996,1999:2004)
+upyear = 1984:2016
+upyear = upyear + 1
+upyear0 = gdpdf$year[gdpdf$year %in% upyear]
 
 dIntercept = vector()
 dBeta = vector()
@@ -40,7 +40,7 @@ gdpdf = na.omit(gdpdf)
 gdpdf$year = as.numeric(gdpdf$year)
 
 upyear = c(1998:2004,2005:2008)
-#upyear = 1985:2017
+#upyear = 1984:2016
 upyear = upyear + 1
 upyear0 = gdpdf$year[gdpdf$year %in% upyear]
 

@@ -4,13 +4,6 @@ home = 'C:/Sync/CoolGirl/Fhe'
 setwd(paste0(home,'/ecosocialData/indexSQL'))
 for (rdat in dir()){load(rdat)}
 
-citylist = read.csv(file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/city_info.csv',stringsAsFactors=F)
-citypre = subset(citylist, citylist$Administrative_level != 'county')$City_ch
-citycoun = subset(citylist, citylist$Administrative_level == 'county')$City_ch
-cityqu = read.csv(file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/ToDistrict.csv',stringsAsFactors=F)[,1]
-mass = c('内蒙市', '胡南省')
-
-
 dflist0 = gsub('.Rdata', '', dir(paste0(home,'/ecosocialData/indexSQL')))
 for (yi in 1:length(dflist0)){
   dfname = dflist0[yi]
@@ -19,19 +12,14 @@ for (yi in 1:length(dflist0)){
   df$value = as.numeric(df$value)
   df$value[which(df$value==0)] = NA
   
-  citydf = unique(df$city)
-  citydel = citydf[!citydf %in% citypre & citydf %in% c(citycoun,cityqu,mass)]
-  df = subset(df, !df$city %in% citydel)
-  
   assign(dfname, df)
-  eval(parse(text = paste0("save(",dfname, ",file='",dfname,".Rdata')")))
   print(yi)
 }
 
 
-# dflist = gsub('.Rdata', '', dir('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL'))
-# 
-# 
+dflist = gsub('.Rdata', '', dir('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL'))
+
+
 # citylist = read.csv(file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/city_info.csv',stringsAsFactors=F)
 # citypre = subset(citylist, citylist$Administrative_level != 'county')$City_ch
 # n = 15
