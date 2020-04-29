@@ -16,7 +16,7 @@ citycoun = subset(citylist, citylist$Administrative_level == 'county')$City_ch
 cityqu = read.csv(file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/ToDistrict.csv',stringsAsFactors=F)[,1]
 mass = c('内蒙市', '胡南省')
 
-
+ 
 dflist0 = gsub('.Rdata', '', dir(paste0(home,'/ecosocialData/indexSQL'))) #全部都需要预处理
 dflist = grep('POP|\\d', dflist0, invert=T, value=T) #用来算OLS的
 
@@ -103,8 +103,13 @@ for (yeari in 1985:2017){
     rangeStat = rangeStatList[1] #按照指标对应的区域更改
     year = yeari
     xdf = get(xdfname)
+<<<<<<< Updated upstream
     #delcity = c('三沙市')
     delcity = c('昌都市','拉萨市','林芝市','日喀则市','山南市','那曲市','三沙市','海东市','儋州市','哈密市','吐鲁番市')
+=======
+    delcity = c('三沙市')
+    #delcity = c('昌都市','拉萨市','林芝市','日喀则市','山南市','那曲市','三沙市','海东市','儋州市','哈密市','吐鲁番市')
+>>>>>>> Stashed changes
     xdf = xdf[which(!(xdf$city %in% delcity)),]
     ydf = get(ydfname)
     ORII = xdf[grepl(rangeStat, xdf$index) & xdf$year==year,]
@@ -149,4 +154,12 @@ for (yeari in 1985:2017){
   sumlmHorizontal = na.omit(rbind(sumlmHorizontal, sumlm))
 }
 save(sumlmHorizontal, file=paste(home,'/Results/',modelname,'/sumlmHorizontal_',rangeStatList[2],'.Rdata',sep=''))
+<<<<<<< Updated upstream
 write.csv(sumlmHorizontal, file=paste(home,'/Results/', modelname,'/sumlmHorizontal_',rangeStatList[2],'.csv',sep=''))
+=======
+write.csv(sumlmHorizontal, file=paste(home,'/Results/', modelname,'/sumlmHorizontal_',rangeStatList[2],'.csv',sep=''))
+
+sumlmHorizontal = sumlmHorizontal[which(sumlmHorizontal$Observation>=200),]
+save(sumlmHorizontal, file=paste(home,'/Results/',modelname,'/200_sumlmHorizontal_',rangeStatList[2],'.Rdata',sep=''))
+write.csv(sumlmHorizontal, file=paste(home,'/Results/', modelname,'/200_sumlmHorizontal_',rangeStatList[2],'.csv',sep=''))
+>>>>>>> Stashed changes

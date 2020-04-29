@@ -1,15 +1,52 @@
 library(ggplot2)
 #library(MASS)
 #library(actuar)
-#library(fitdistrplus)
+library(fitdistrplus)
 library(poweRlaw)
 
+home = 'C:/Sync/CoolGirl/Fhe'
+WithoutXJS = T
 setwd('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL')
 for (rdat in dir()){load(rdat)}
 
+dflist0 = gsub('.Rdata', '', dir(paste0(home,'/ecosocialData/indexSQL'))) #全部都需要预处理
+#dflist = grep('POP|\\d', dflist0, invert=T, value=T) #用来算OLS的
+
+for (yi in 1:length(dflist0)){
+  dfname = dflist0[yi]
+  df = get(dfname)
+  df$year = as.integer(df$year)
+  df$value = as.numeric(df$value)
+  df$value[which(df$value==0)] = NA
+  assign(dfname, df)
+  #eval(parse(text = paste0('return(',dfname, ')')))
+}
+
+
+if (WithoutXJS){
+  modelname = 'OLS1_DJS'
+  citylist = read.csv(file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/city_info.csv',stringsAsFactors=F)
+  citypre = subset(citylist, citylist$Administrative_level != 'county')$City_ch
+  citycoun = subset(citylist, citylist$Administrative_level == 'county')$City_ch
+  cityqu = read.csv(file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/ToDistrict.csv',stringsAsFactors=F)[,1]
+  mass = c('内蒙市', '胡南省')
+  for (yi in 1:length(dflist0)){
+    dfname = dflist0[yi]
+    df = get(dfname)
+    citydf = unique(df$city)
+    citydel = citydf[!citydf %in% citypre & citydf %in% c(citycoun,cityqu,mass)]
+    df = subset(df, !df$city %in% citydel)
+    
+    assign(dfname, df)
+    #eval(parse(text = paste0('return(',dfname, ')')))
+    print(yi)
+  }
+} else {modelname = 'OLS2_XJS'}
+
 Alpha = function(dfname, rangeStat, yeari, scale, denfun){
   dfi = get(dfname)
-  delcity = c('昌都市','拉萨市','林芝市','日喀则市','山南市','那曲市','三沙市','海东市','儋州市')
+  delcity = '三沙市'
+  #delcity = c('昌都市','拉萨市','林芝市','日喀则市','山南市','那曲市','三沙市','海东市','儋州市')
   dfi = dfi[which(!(dfi$city %in% delcity)),]
   dfi = na.omit(dfi)
   dat = dfi[which(dfi$year == yeari & grepl(rangeStat,dfi$index)),]
@@ -86,17 +123,18 @@ AlphaAll = function(dfname0, rangeStat0, yeari0, scale0, denfun0){
 }
 
 POPdf = AlphaAll(dfname0='POP', rangeStat0='市辖区', yeari0=1985:2017, scale0=F, denfun0='conpl') #conlnorm
-GDPdf = AlphaAll(dfname0='GDP', rangeStat0='市辖区', yeari0=1985:2017, scale0=T, denfun0='conpl') #conlnorm
+#GDPdf = AlphaAll(dfname0='GDP', rangeStat0='市辖区', yeari0=1985:2017, scale0=T, denfun0='conpl') #conlnorm
 
 dftau0 = data.frame()
-dflist = gsub('.Rdata', '', dir('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL'))
-Ydflist = dflist[!grepl('POP', dflist)]
-for (i in length(Ydflist)){
+#dftau0 = data.frame()
+Ydflist = grep('POP|\\d', dflist0, invert=T, value=T) #用来算OLS的
+#Ydflist = dflist[!grepl('POP', dflist)]
+for (i in 1:length(Ydflist)){
   dfname = Ydflist[i]
   dftau = AlphaAll(dfname0=dfname, rangeStat0='市辖区', yeari0=1985:2017, scale0=F, denfun0='conpl')
   dftau0 = rbind(dftau0, dftau)
 }
-dftau0 = rbind(GDPdf, dftau0)
+#dftau0 = rbind(GDPdf, dftau0)
 save(dftau0, file='C:/Sync/CoolGirl/Fhe/Results/3powerlaw/dftau0.Rdata')
 
 

@@ -16,7 +16,7 @@ IDDELF = function(ddat){
   }
   return(ddat)
 }
-
+ 
 
 SearchCorValue = function(ORI, COR){ #找到某指标对应的另一指标的值
   ORI = IDDELF(ORI)
@@ -54,7 +54,12 @@ library(ggplot2)
 
 ############## 需要设置 ##############################
 
+<<<<<<< Updated upstream
 for (plan in c('D-XJS', 'D+XJS', 'T-XJS', 'T+XJS')){
+=======
+#for (plan in c('D-XJS', 'D+XJS', 'T-XJS', 'T+XJS')){
+for (plan in c('D-XJS', 'T-XJS')){
+>>>>>>> Stashed changes
   if (plan == 'D-XJS'){
     rangeStatList = c('市辖区', 'Districts', 'BetaD/', 'FigD/')
     WithoutXJS = TRUE
@@ -69,6 +74,10 @@ for (plan in c('D-XJS', 'D+XJS', 'T-XJS', 'T+XJS')){
     WithoutXJS = FALSE
   }
   
+<<<<<<< Updated upstream
+=======
+  
+>>>>>>> Stashed changes
   print(c(rangeStatList,WithoutXJS))
   
   #####################################################
@@ -133,8 +142,13 @@ for (plan in c('D-XJS', 'D+XJS', 'T-XJS', 'T+XJS')){
       rangeStat = rangeStatList[1] #按照指标对应的区域更改
       year = yeari
       xdf = get(xdfname)
+<<<<<<< Updated upstream
       #delcity = c('三沙市')
       delcity = c('昌都市','拉萨市','林芝市','日喀则市','山南市','那曲市','三沙市','海东市','儋州市','哈密市','吐鲁番市','重庆市')
+=======
+      delcity = c('三沙市')
+      #delcity = c('昌都市','拉萨市','林芝市','日喀则市','山南市','那曲市','三沙市','海东市','儋州市','哈密市','吐鲁番市','重庆市')
+>>>>>>> Stashed changes
       xdf = xdf[which(!(xdf$city %in% delcity)),]
       ydf = get(ydfname)
       ORII = xdf[grepl(rangeStat, xdf$index) & xdf$year==year,]
@@ -189,11 +203,16 @@ for (plan in c('D-XJS', 'D+XJS', 'T-XJS', 'T+XJS')){
         dev.off()}
     }
     sumlm = data.frame(yIndex=dflist, Beta=Beta, Intercept=Intercept, Pvalue=Pvalue, BetaLower=BetaLower, BetaUpper=BetaUpper, InterceptLower=InterceptLower, InterceptUpper=InterceptUpper, Rsquare=Rsquare, Observation=Observation, year=yeari)
+<<<<<<< Updated upstream
     sumlmHorizontal = na.omit(rbind(sumlmHorizontal, sumlm))
+=======
+    sumlmHorizontal = rbind(sumlmHorizontal, sumlm)
+>>>>>>> Stashed changes
   }
   save(sumlmHorizontal, file=paste(home,'/Results/',modelname,'/sumlmHorizontal_',rangeStatList[2],'.Rdata',sep=''))
   write.csv(sumlmHorizontal, file=paste(home,'/Results/', modelname,'/sumlmHorizontal_',rangeStatList[2],'.csv',sep=''))
   
+<<<<<<< Updated upstream
   
   ##################################
   ### 开始呈现出这些beta
@@ -303,6 +322,20 @@ for (plan in c('D-XJS', 'D+XJS', 'T-XJS', 'T+XJS')){
   }
   
   
+=======
+  ##################################
+  load(file=paste(home,'/Results/',modelname,'/sumlmHorizontal_',rangeStatList[2],'.Rdata',sep=''))
+  if (WithoutXJS) {
+    sumlmHorizontal[which(sumlmHorizontal$Observation<=200),c('Beta','Intercept','Rsquare')] = NA
+    save(sumlmHorizontal, file=paste(home,'/Results/',modelname,'/200_sumlmHorizontal_',rangeStatList[2],'.Rdata',sep=''))
+    write.csv(sumlmHorizontal, file=paste(home,'/Results/', modelname,'/200_sumlmHorizontal_',rangeStatList[2],'.csv',sep=''))
+  } else {
+    sumlmHorizontal[which(sumlmHorizontal$Observation<=500),c('Beta','Intercept','Rsquare')] = NA
+    save(sumlmHorizontal, file=paste(home,'/Results/',modelname,'/500_sumlmHorizontal_',rangeStatList[2],'.Rdata',sep=''))
+    write.csv(sumlmHorizontal, file=paste(home,'/Results/', modelname,'/500_sumlmHorizontal_',rangeStatList[2],'.csv',sep=''))
+  }
+  
+>>>>>>> Stashed changes
   # ############################### temporal dynamics of intercept
   # rangeStatList[3] = 'InterceptD/'
   # 

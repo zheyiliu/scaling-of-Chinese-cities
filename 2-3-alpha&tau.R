@@ -4,8 +4,45 @@ library(ggplot2)
 library(fitdistrplus)
 library(poweRlaw)
 
+home = 'C:/Sync/CoolGirl/Fhe'
+WithoutXJS = T
 setwd('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL')
 for (rdat in dir()){load(rdat)}
+
+dflist0 = gsub('.Rdata', '', dir(paste0(home,'/ecosocialData/indexSQL'))) #全部都需要预处理
+#dflist = grep('POP|\\d', dflist0, invert=T, value=T) #用来算OLS的
+
+for (yi in 1:length(dflist0)){
+  dfname = dflist0[yi]
+  df = get(dfname)
+  df$year = as.integer(df$year)
+  df$value = as.numeric(df$value)
+  df$value[which(df$value==0)] = NA
+  assign(dfname, df)
+  #eval(parse(text = paste0('return(',dfname, ')')))
+}
+
+
+if (WithoutXJS){
+  modelname = 'OLS1_DJS'
+  citylist = read.csv(file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/city_info.csv',stringsAsFactors=F)
+  citypre = subset(citylist, citylist$Administrative_level != 'county')$City_ch
+  citycoun = subset(citylist, citylist$Administrative_level == 'county')$City_ch
+  cityqu = read.csv(file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/ToDistrict.csv',stringsAsFactors=F)[,1]
+  mass = c('内蒙市', '胡南省')
+  for (yi in 1:length(dflist0)){
+    dfname = dflist0[yi]
+    df = get(dfname)
+    citydf = unique(df$city)
+    citydel = citydf[!citydf %in% citypre & citydf %in% c(citycoun,cityqu,mass)]
+    df = subset(df, !df$city %in% citydel)
+    
+    assign(dfname, df)
+    #eval(parse(text = paste0('return(',dfname, ')')))
+    print(yi)
+  }
+} else {modelname = 'OLS2_XJS'}
+
 
 Alpha = function(dfname, rangeStat, yeari, denfun){
   #dfname='Area'
@@ -13,7 +50,8 @@ Alpha = function(dfname, rangeStat, yeari, denfun){
   #rangeStat='市辖区'
   #denfun=c('conpl','conlnorm')
   dfi = get(dfname)
-  delcity = c('昌都市','拉萨市','林芝市','日喀则市','山南市','那曲市','三沙市','海东市','儋州市')
+  delcity = '三沙市'
+  #delcity = c('昌都市','拉萨市','林芝市','日喀则市','山南市','那曲市','三沙市','海东市','儋州市')
   dfi = dfi[which(!(dfi$city %in% delcity)),]
   dfi = na.omit(dfi)
   dat = dfi[which(dfi$year == yeari & grepl(rangeStat,dfi$index)),]
@@ -43,8 +81,8 @@ Alpha = function(dfname, rangeStat, yeari, denfun){
     #parallel::detectCores()#查看有几个线程
     #bs = bootstrap(m1, no_of_sims=100, threads=4)
     #plot(jitter(bs$bootstraps[,2], factor=1.2), bs$bootstraps[,3])
-    bs_p1 = bootstrap_p(m1, no_of_sims=100, threads=4)
-    bs_p2 = bootstrap_p(m2, no_of_sims=100, threads=4)
+    bs_p1 = bootstrap_p(m1, no_of_sims=50, threads=4)
+    bs_p2 = bootstrap_p(m2, no_of_sims=50, threads=4)
     
     
     if (dfname=='POP'){
@@ -102,19 +140,22 @@ AlphaAll = function(dfname0, rangeStat0, yeari0, denfun0){
   all0
 }
 
-POPdf = AlphaAll(dfname0='POP', rangeStat0='市辖区', yeari0=1985:2017, denfun0=c('conpl','conlnorm'))
-GDPdf = AlphaAll(dfname0='GDP', rangeStat0='市辖区', yeari0=1985:2017, denfun0=c('conpl','conlnorm'))
+#POPdf = AlphaAll(dfname0='POP', rangeStat0='市辖区', yeari0=1985:2017, denfun0=c('conpl','conlnorm'))
+#Areadf = AlphaAll(dfname0='Area', rangeStat0='市辖区', yeari0=1985:2017, denfun0=c('conpl','conlnorm'))
 
-dflist = gsub('.Rdata', '', dir('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL'))
-dftau0 = data.frame()
-Ydflist = dflist[!grepl('POP', dflist)]
+#dftau0 = data.frame()
+Ydflist = grep('POP|\\d', dflist0, invert=T, value=T) #用来算OLS的
+#Ydflist = dflist[!grepl('POP', dflist)]
 for (i in 1:length(Ydflist)){
   dfname = Ydflist[i]
+  print(c(i,dfname))
   dftau = AlphaAll(dfname0=dfname, rangeStat0='市辖区', yeari0=1985:2017, denfun0=c('conpl','conlnorm'))
-  dftau0 = rbind(dftau0, dftau)
+  #dftau0 = rbind(dftau0, dftau)
+  eval(parse(text=paste0('remove(', dfname, ")")))
+  eval(parse(text=paste0('remove(', Rdataname, ")")))
 }
 #dftau0 = rbind(GDPdf, dftau0)
-save(dftau0, file='C:/Sync/CoolGirl/Fhe/Results/3powerlaw/dftau0.Rdata')
+#save(dftau0, file='C:/Sync/CoolGirl/Fhe/Results/3powerlaw/dftau0.Rdata')
 
 
 

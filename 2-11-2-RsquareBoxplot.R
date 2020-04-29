@@ -308,6 +308,7 @@ sumlmHorizontal[sumlmHorizontal$yIndex %in% economoicdf,]$type = 'socio-economic
 sumlmHorizontal[sumlmHorizontal$yIndex %in% infrasdf,]$type = 'infrastructure'
 sumlmHorizontal[sumlmHorizontal$yIndex %in% needdf,]$type = 'individual-need'
 sumlmHorizontal[sumlmHorizontal$yIndex %in% areadf,]$type = 'area'
+a = aggregate(sumlmHorizontal$Rsquare, by=list(sumlmHorizontal$type), FUN=mean)
 
 PB0 = sumlmHorizontal[,c('Rsquare','year','type')]
 PB0 = na.omit(PB0)
@@ -315,20 +316,26 @@ PB1 = subset(PB0, PB0$year %in% c(1987,1997,2007,2017))
 PB1$year = PB1$year - 1
 PB2 = rbind(PB1, alldf)
 
-png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/OLS_R/R2Boxplot1.png'),
-    width=16,height=15, units='cm',res=180)
+png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/OLS_R/R2Boxplot1facet33.png'),
+    width=24,height=8, units='cm',res=180)
 p = ggplot(data = PB2,aes(x = as.factor(year), y = Rsquare)) +
   #geom_boxplot(fill=col1) +
   geom_boxplot(fill=rep(col1,4)) +
-  facet_wrap(.~type,nrow=2) +
-  labs(x = 'Year', y='R-square') +
+  geom_hline(yintercept=a$x,alpha=1, lwd=1,
+             col = c( c(col[1],NA,NA,NA),
+                      c(NA,col[2],NA,NA),
+                      c(NA,NA,col[3],NA),
+                      c(NA,NA,NA,col[4]))) +
+  facet_wrap(.~type,nrow=1) +
+  labs(x = NULL, y='R-square') +
   theme(text = element_text(size=16),
         legend.title=element_blank(),
         panel.grid =element_blank(),                                             #默认主题
         panel.background = element_rect(fill = "transparent",colour = 'black'),  #默认主题
-        legend.key = element_rect(fill = "transparent", color = "transparent"))  #默认主题
+        legend.key = element_rect(fill = "transparent", color = "transparent"),  #默认主题
         #axis.line = element_line(colour = "black"),
-        #axis.text.x = element_text(angle = 90, hjust = 0.5, vjust = 0.5))
+        axis.text.x = element_text(angle = 45, vjust=1.1, hjust=1))
+        #axis.text.x = element_text(angle = 90, vjust=0.5, hjust=1))
 print(p)
 dev.off()
 
@@ -348,4 +355,19 @@ p = ggplot(data = foo,aes(x = type, y = Rsquare.y)) +
 print(p)
 dev.off()
 
-
+a = aggregate(sumlmHorizontal$Rsquare, by=list(sumlmHorizontal$year),mean)
+png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/OLS_R/R2points.png'),
+    width=16,height=15, units='cm',res=180)
+p = ggplot(data = a,aes(x = Group.1, y = x)) +
+  geom_point(size=3) +
+  geom_hline(yintercept=0.5,lwd=1,lty=2) +
+  labs(x = 'Year', y='R-square') +
+  theme(text = element_text(size=18),
+        legend.title=element_blank(),
+        panel.grid =element_blank(),                                             #默认主题
+        panel.background = element_rect(fill = "transparent",colour = 'black'),  #默认主题
+        legend.key = element_rect(fill = "transparent", color = "transparent"))  #默认主题
+#axis.line = element_line(colour = "black"),
+#axis.text.x = element_text(angle = 90, hjust = 0.5, vjust = 0.5))
+print(p)
+dev.off()
