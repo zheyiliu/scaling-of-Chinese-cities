@@ -1,11 +1,3 @@
-<<<<<<< Updated upstream
-library(ggplot2)
-modelname='OLS'
-rangeStatList = c('市辖区', 'Districts', 'BetaD/')
-setwd(paste0('C:/Sync/CoolGirl/Fhe/Results/',modelname))
-load(paste0('sumlmHorizontal_',rangeStatList[2],'.Rdata'))
-
-=======
 # mydf$financial = rgb(0,0,0,150,maxColorValue=255)
 # mydf$financial[which(mydf$d.deposit.rate > 0)] = rgb(225,0,0,150,maxColorValue=255)
 # mydf$financial[which(mydf$d.deposit.rate < 0)] = rgb(0,0,255,150,maxColorValue=255)
@@ -15,7 +7,7 @@ load(paste0('sumlmHorizontal_',rangeStatList[2],'.Rdata'))
 # #plot(dBeta, dIntercept,xlim=c(-0.1,0.1), col=drate,cex=(range01(mydf$d.deposit.rate)*2+0.5))
 # abline(v=0)
 # abline(h=0)
- 
+
 library(ggplot2)
 home = 'C:/Sync/CoolGirl/Fhe'
 modelname='OLS1_DJS_origin'
@@ -32,7 +24,6 @@ sumlmHorizontal = sumlmHorizontal[!del,]
 
 #load(paste0('sumlmHorizontal_',rangeStatList[2],'.Rdata'))
 
->>>>>>> Stashed changes
 gdpdf = sumlmHorizontal[which(sumlmHorizontal$yIndex=='GDP'),]
 gdpdf = na.omit(gdpdf)
 gdpdf = gdpdf[,c('Beta', 'Intercept', 'year')]
@@ -43,13 +34,8 @@ urbanization = read.csv('C:/Sync/CoolGirl/Fhe/ecosocialDATA/urbanization.csv', h
 rate = read.csv('C:/Sync/CoolGirl/Fhe/ecosocialDATA/DepositRate.csv', header=T)
 
 upyear = 1984:2016
-<<<<<<< Updated upstream
-upyear0 = c(gdpdf$year[gdpdf$year %in% upyear],1992)
-
-=======
 upyear0 = c(gdpdf$year[gdpdf$year %in% upyear])
 upyear0 = 1984:2016
->>>>>>> Stashed changes
 
 dIntercept = vector()
 dBeta = vector()
@@ -76,35 +62,6 @@ mydf = merge(mydf, rate, by='year')
 mydf = merge(mydf, dd, by='year')
 
 range01 <- function(x){(x-min(x))/(max(x)-min(x))}
-<<<<<<< Updated upstream
-for (n in 2:ncol(mydf)){mydf[,n] = range01(mydf[,n])}
-
-plot(mydf$year, mydf$dBeta, col=1)
-lines(mydf$year, mydf$dBeta, col=1)
-
-points(mydf$year, mydf$d.deposit.rate, col=3)
-lines(mydf$year, mydf$d.deposit.rate, col=3)
-
-plot(mydf$year, mydf$gdp.growth.rate,col=4)
-lines(mydf$year, mydf$gdp.growth.rate,col=4)
-
-dgdp = as.numeric(mydf$d.gdp.rate > 0) + 1
-
-plot(dBeta, dIntercept, type='n',xlim=c(-0.1,0.1), col=dgdp)
-#text(dBeta, dIntercept, labels=dyear, col=dgdp,cex=((range01(mydf$d.gdp.rate)+0.5)*0.8))
-text(dBeta, dIntercept, labels=dyear, cex=0.8, col=dgdp)
-#plot(dBeta, dIntercept,xlim=c(-0.1,0.1), pch=19, col=dgdp,cex=((range01(mydf$d.gdp.rate)+0.5)*2))
-abline(v=0)
-abline(h=0)
-
-drate = as.numeric(mydf$d.deposit.rate > 0) + 1
-
-#plot(dBeta, dIntercept, type='n',xlim=c(-0.1,0.1), col=drate)
-#text(dBeta, dIntercept, labels=dyear, cex=0.8, col=drate)
-plot(dBeta, dIntercept,xlim=c(-0.1,0.1), col=drate,cex=(range01(mydf$d.deposit.rate)*2+0.5))
-abline(v=0)
-abline(h=0)
-=======
 mydf1 = mydf
 for (n in 2:ncol(mydf1)){mydf1[,n] = range01(mydf1[,n])}
 
@@ -627,4 +584,3 @@ p = ggplot(data=xall, aes(x=Beta, y=Intercept, color=stage,cex=2)) +
     legend.position="none"
   )
 print(p)
->>>>>>> Stashed changes

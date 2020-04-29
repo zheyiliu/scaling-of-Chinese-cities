@@ -15,18 +15,21 @@ library(readxl)
 
 setwd('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/alldata/')
 yearall = dir()
+yearall = yearall[yearall!=2018]
 
 
 #### 以标题名重命名
 for (yeari in yearall){
+
   setwd(paste0('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/alldata/',yeari,'/csv/'))
   fileall = dir()
   fileall = fileall[grepl('.xls',fileall)]
-
+  
   for (f in fileall){
     
     tst = read_excel(f, sheet = 1, col_names=F, col_types='text')
     m=1
+    if (nrow(tst)==0){break}
     while(sum(!is.na(tst[m,]))==0){
       tst = tst[-m,]
     }

@@ -1,38 +1,36 @@
-library(readxl)
 
-setwd('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/alldata/')
-yearall = dir()
+################ From .xls to .csv #################
+library(readxl)
+yeari = 2018
+setwd(paste0('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/alldata/',yeari,'/csv/'))
 
 
 #### 以标题名重命名
-for (yeari in yearall){
-  setwd(paste0('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/alldata/',yeari,'/csv/'))
-  fileall = dir()
-  fileall = fileall[grepl('.xls',fileall)]
-
+ fileall = dir()
+  fileall = fileall[grepl('.xlsx',fileall)]
+  
   for (f in fileall){
     
     tst = read_excel(f, sheet = 1, col_names=F, col_types='text')
     m=1
+    if (nrow(tst)==0){break}
     while(sum(!is.na(tst[m,]))==0){
       tst = tst[-m,]
     }
     l = paste0(sample(letters,1),sample(letters,1),sample(letters,1),sample(letters,1))
-    newname = paste(tst[1,][which(!is.na(tst[1,]))][1], l, '.xls', sep='')
+    newname = paste(tst[1,][which(!is.na(tst[1,]))][1], l, '.xlsx', sep='')
     newname = gsub(' ','',newname)
     newname = paste('中国城市统计年鉴', yeari, newname, sep='-')
     
     file.rename(f, newname)
   }
-}
+
 
 #### 找出多个sheet的xls
-troublelist = vector()             
-for (yeari in yearall){
-  setwd(paste0('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/alldata/',yeari,'/csv/'))
   fileall = dir()
-  fileall = fileall[grepl('.xls',fileall)]
-  
+  fileall = fileall[grepl('.xlsx',fileall)]
+troublelist = vector()             
+
   for (f in fileall){
     shname = readxl::excel_sheets(f)
     cnki = grepl(".*[A-Za-z]+.*",shname)
@@ -43,15 +41,10 @@ for (yeari in yearall){
       troublelist = c(troublelist, paste(yeari, f, shname1[hyphen],sep=','))
     }
   }
-}
 
 ### 只有一个sheet的xls
 safelist = vector()
-for (yeari in yearall){
-  setwd(paste0('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/alldata/',yeari,'/csv/'))
-  fileall = dir()
-  fileall = fileall[grepl('.xls',fileall)]
-  
+ 
   for (f in fileall){
     shname = readxl::excel_sheets(f)
     cnki = grepl(".*[A-Za-z]+.*",shname)
@@ -62,7 +55,7 @@ for (yeari in yearall){
       safelist = c(safelist, paste(yeari, f,sep=';'))
     }
   }
-}
+
 
 # collist = vector()
 # for (t in 1:length(troublelist)) {
@@ -115,7 +108,7 @@ for (t in 1:length(troublelist)){
     tst = rbind(tst, shtst)
   }
   colnames(tst)=NA
-  fn = gsub('xls','csv',ft) 
+  fn = gsub('xlsx','csv',ft) 
   write.csv(tst, file=paste0('C:/Sync/CoolGirl/Fhe/ecosocialdata/原始数据/DataForCal/super-',fn),row.names=F)
 }
 
@@ -131,7 +124,7 @@ for (t in 1:length(safelist)){
   
   tst = read_excel(ft, sheet = 1,col_names=F, col_types='text')
   colnames(tst)=NA
-  fn = gsub('xls','csv',ft) 
+  fn = gsub('xlsx','csv',ft) 
   write.csv(tst, file=paste0('C:/Sync/CoolGirl/Fhe/ecosocialdata/原始数据/DataForCal/super-',fn),row.names=F)
 }
 

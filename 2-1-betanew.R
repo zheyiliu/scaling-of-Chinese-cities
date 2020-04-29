@@ -16,7 +16,7 @@ IDDELF = function(ddat){
   }
   return(ddat)
 }
- 
+
 
 SearchCorValue = function(ORI, COR){ #找到某指标对应的另一指标的值
   ORI = IDDELF(ORI)
@@ -54,12 +54,8 @@ library(ggplot2)
 
 ############## 需要设置 ##############################
 
-<<<<<<< Updated upstream
-for (plan in c('D-XJS', 'D+XJS', 'T-XJS', 'T+XJS')){
-=======
 #for (plan in c('D-XJS', 'D+XJS', 'T-XJS', 'T+XJS')){
 for (plan in c('D-XJS', 'T-XJS')){
->>>>>>> Stashed changes
   if (plan == 'D-XJS'){
     rangeStatList = c('市辖区', 'Districts', 'BetaD/', 'FigD/')
     WithoutXJS = TRUE
@@ -74,10 +70,7 @@ for (plan in c('D-XJS', 'T-XJS')){
     WithoutXJS = FALSE
   }
   
-<<<<<<< Updated upstream
-=======
   
->>>>>>> Stashed changes
   print(c(rangeStatList,WithoutXJS))
   
   #####################################################
@@ -142,13 +135,8 @@ for (plan in c('D-XJS', 'T-XJS')){
       rangeStat = rangeStatList[1] #按照指标对应的区域更改
       year = yeari
       xdf = get(xdfname)
-<<<<<<< Updated upstream
-      #delcity = c('三沙市')
-      delcity = c('昌都市','拉萨市','林芝市','日喀则市','山南市','那曲市','三沙市','海东市','儋州市','哈密市','吐鲁番市','重庆市')
-=======
       delcity = c('三沙市')
       #delcity = c('昌都市','拉萨市','林芝市','日喀则市','山南市','那曲市','三沙市','海东市','儋州市','哈密市','吐鲁番市','重庆市')
->>>>>>> Stashed changes
       xdf = xdf[which(!(xdf$city %in% delcity)),]
       ydf = get(ydfname)
       ORII = xdf[grepl(rangeStat, xdf$index) & xdf$year==year,]
@@ -203,126 +191,11 @@ for (plan in c('D-XJS', 'T-XJS')){
         dev.off()}
     }
     sumlm = data.frame(yIndex=dflist, Beta=Beta, Intercept=Intercept, Pvalue=Pvalue, BetaLower=BetaLower, BetaUpper=BetaUpper, InterceptLower=InterceptLower, InterceptUpper=InterceptUpper, Rsquare=Rsquare, Observation=Observation, year=yeari)
-<<<<<<< Updated upstream
-    sumlmHorizontal = na.omit(rbind(sumlmHorizontal, sumlm))
-=======
     sumlmHorizontal = rbind(sumlmHorizontal, sumlm)
->>>>>>> Stashed changes
   }
   save(sumlmHorizontal, file=paste(home,'/Results/',modelname,'/sumlmHorizontal_',rangeStatList[2],'.Rdata',sep=''))
   write.csv(sumlmHorizontal, file=paste(home,'/Results/', modelname,'/sumlmHorizontal_',rangeStatList[2],'.csv',sep=''))
   
-<<<<<<< Updated upstream
-  
-  ##################################
-  ### 开始呈现出这些beta
-  
-  setwd(paste0(home,'/Results/',modelname))
-  load(paste0('sumlmHorizontal_',rangeStatList[2],'.Rdata'))
-  
-  ### temporal dynamics of each Y
-  #sumlmHorizontal = sumlmHorizontal[which(sumlmHorizontal$Rsquare>=0.9),]
-  for (yname in unique(sumlmHorizontal$yIndex)){
-    dfBeta = sumlmHorizontal[sumlmHorizontal$yIndex==yname,]
-    dat = dfBeta
-    png(filename=paste0(rangeStatList[3],yname,'.png'),width=15,height=15, units='cm',res=150)
-    p = ggplot(data=dat, aes(x=year-1, y=Beta)) + 
-      geom_point(size = 2.2, colour='#FF6600') +
-      geom_errorbar(aes(ymin=BetaLower, ymax=BetaUpper), width=.1, colour='#FF6600') +
-      geom_hline(yintercept = c(7/6,1,5/6),alpha=0.4) +
-      labs(x = 'Year(1984-2016)', y='β', title=paste0(gsub(rangeStat, '', yname),'.',rangeStatList[2])) +
-      theme(text = element_text(size=18))
-    print(p)
-    dev.off()
-  }
-  
-  
-  
-  ### comparing betas of different years
-  
-  #经济 #基建 #个人需要
-  ## 删掉了BusPassenger,Passenger,Bus,Crash,Fire
-  col = c("#619CFF", "grey52", "#00BA38", "#F8766D")
-  economoicdf = c('Book','Deposit','DepositHousehold','Electricity','FixedAssets','GDP','Loan','PostTele','Retail','Salary','WasteWater','Water')
-  infrasdf = c('Cinema', 'CityRoadArea','Doctor','Gas.Length','Green','GreenBuilt','Hospital','HospitalBerth','School','PavedRoad.Length','PrimarySchool','PrimaryTeacher','School','Sewage.Length','WaterSupply.Length')
-  needdf = c('ElectricityResident','LivingSpace','WaterResident')
-  areadf = c('Area', 'AreaBuilt')
-  
-  sumlmHorizontal$type=NA
-  sumlmHorizontal[sumlmHorizontal$yIndex %in% economoicdf,]$type = 'socio-economic'
-  sumlmHorizontal[sumlmHorizontal$yIndex %in% infrasdf,]$type = 'infrastructure'
-  sumlmHorizontal[sumlmHorizontal$yIndex %in% needdf,]$type = 'individual need'
-  sumlmHorizontal[sumlmHorizontal$yIndex %in% areadf,]$type = 'Area'
-  
-  yearlist = c(1985, 1987, 1988, 1998, 2008, 2017)
-  dfBeta = sumlmHorizontal[sumlmHorizontal$year %in% yearlist & !is.na(sumlmHorizontal$type),]
-  ymina = min(dfBeta$BetaLower)
-  ymaxa = max(dfBeta$BetaUpper)
-  
-  for (yearii in yearlist){
-    dfBeta1 = dfBeta[dfBeta$year == yearii,]
-    dfBeta2 = dfBeta1[order(dfBeta1$year, dfBeta1$Beta),]
-    
-    png(filename=paste0(home,'/Results/',modelname,'/',rangeStatList[4],yearii-1,'AllTemporal.png'),
-        width=17,height=15, units='cm',res=180)
-    p = ggplot(data=dfBeta2, aes(x=reorder(yIndex,Beta), y=Beta, color=type)) + 
-      ylim(ymina, ymaxa) +
-      scale_colour_manual(values = col) +
-      geom_point(size = 2.2) +
-      geom_errorbar(aes(ymin=BetaLower, ymax=BetaUpper), width=.1,alpha=0.8) +
-      geom_hline(yintercept = c(2/3,1,5/6,7/6),alpha=0.4, color=col, lwd=1.5) +
-      labs(x = paste0('Urban attributes (', yearii-1, ')'), y='β') +
-      theme(text = element_text(size=18),
-            legend.title=element_blank(),
-            panel.grid =element_blank(),                                             #默认主题
-            panel.background = element_rect(fill = "transparent",colour = 'black'),  #默认主题
-            legend.key = element_rect(fill = "transparent", color = "transparent"),  #默认主题
-            #axis.line = element_line(colour = "black"),
-            axis.text.x = element_text(angle = 90, hjust = 0.5, vjust = 0.5))
-    print(p)
-    dev.off()
-  }
-  
-  ### 4 classifications
-  col = c("#619CFF", "grey52", "#00BA38", "#F8766D")
-  ylists = c('Book','Deposit','DepositHousehold','Electricity','FixedAssets','GDP','Loan','PostTele','Retail','Salary','WasteWater','Water')
-  ylisti1 = c('CityRoadArea','Gas.Length','Green','GreenBuilt','PavedRoad.Length','Sewage.Length','WaterSupply.Length')
-  #ylisti2 = c('Cinema', 'Hospital','School','PrimarySchool','PrimaryTeacher','Doctor','HospitalBerth')
-  ylisti2 = c('Cinema', 'Hospital','School','PrimarySchool','HospitalBerth')
-  yliste = c('ElectricityResident','LivingSpace','WaterResident')
-  ylista = c('Area', 'AreaBuilt')
-  #ylists = c('GDP', 'Salary', 'DepositHousehold') #'Book', 'PostTele'
-  #ylisti = c('CityRoadArea','Hospital')  #'HospitalBerth'
-  #yliste = c('Electricity', 'Water')
-  #ylista = c('Area', 'AreaBuilt')
-  for (ylist in list(ylists, ylisti1, ylisti2, yliste, ylista)){
-    ###ylist = ylista
-    ###dfBeta = sumlmHorizontal[which(sumlmHorizontal$yIndex %in% ylist & !sumlmHorizontal$year %in% c(1989, 1995,1985)),]
-    dfBeta = sumlmHorizontal[which(sumlmHorizontal$yIndex %in% ylist),]
-    dfBeta$yIndex = as.character(dfBeta$yIndex)
-    png(filename=paste0(home, '/Results/',modelname,'/',rangeStatList[4],ylist[1],'BetaTemporal.png'),
-        width=32,height=13, units='cm',res=180)
-    p = ggplot(data=dfBeta, aes(x=year-1, y=Beta, color=yIndex)) + 
-      geom_line(size=1,alpha=0.4) + geom_point(size=2) +
-      geom_errorbar(aes(ymin=BetaLower, ymax=BetaUpper), width=.2, alpha=0.4) +
-      geom_hline(yintercept = c(2/3,1,5/6,7/6),alpha=0.4, color=col, lwd=1.5) +
-      #geom_hline(yintercept = c(7/6,1,5/6),alpha=0.7,size=1,color='darkorange') +
-      labs(x = 'Year(1984-2016)', y='β') +
-      theme(
-        text = element_text(size=18),
-        panel.background = element_rect(fill = "transparent",colour = 'black'), 
-        panel.grid.minor = element_line(color='azure3'), 
-        panel.grid.major = element_line(color='azure3'),
-        legend.key = element_rect(fill = "transparent", color = "transparent"), 
-        #plot.background = element_rect(fill = "transparent",colour = NA),
-        legend.title=element_blank()
-      )
-    print(p)
-    dev.off()
-  }
-  
-  
-=======
   ##################################
   load(file=paste(home,'/Results/',modelname,'/sumlmHorizontal_',rangeStatList[2],'.Rdata',sep=''))
   if (WithoutXJS) {
@@ -335,7 +208,6 @@ for (plan in c('D-XJS', 'T-XJS')){
     write.csv(sumlmHorizontal, file=paste(home,'/Results/', modelname,'/500_sumlmHorizontal_',rangeStatList[2],'.csv',sep=''))
   }
   
->>>>>>> Stashed changes
   # ############################### temporal dynamics of intercept
   # rangeStatList[3] = 'InterceptD/'
   # 
