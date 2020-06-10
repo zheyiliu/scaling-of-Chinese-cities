@@ -3,19 +3,23 @@
 ### 每个指标每年一个beta
 ### 去除同年同城市同指标的不同数值的情况
 IDDELF = function(ddat){
-  #ddat = GDP
+  #ddat = Employee
+  ddat = na.omit(ddat)
+  ddat = ddat[!duplicated(ddat),]
   iddelf = vector()
   wield = paste0(ddat[,2], ddat[,3], ddat[,4])
   f= ddat[duplicated(wield),]
   if (nrow(f)>0){
-    for (i in 1:dim(f)[1]){
-      ff = subset(ddat,ddat$city==f$city[i] & ddat$year==f$year[i] & ddat$index==f$index[i])
-      iddelf = c(iddelf, ff$id[-1])
-    }
-    ddat = ddat[which(!ddat$id %in% iddelf),]
+	for (i in 1:dim(f)[1]){
+		ff = subset(ddat,ddat$city==f$city[i] & ddat$year==f$year[i] & ddat$index==f$index[i])
+	  iddelf = c(iddelf, ff$id[-1])
+	}
+  ddat = ddat[which(!ddat$id %in% iddelf),]
   }
   return(ddat)
 }
+
+
 
 
 SearchCorValue = function(ORI, COR){ #找到某指标对应的另一指标的值
@@ -77,11 +81,12 @@ for (plan in c('D-XJS', 'T-XJS')){
   
   #home = '/home/zheyi'
   home = 'C:/Sync/CoolGirl/Fhe'
-  setwd(paste0(home,'/ecosocialData/indexSQL'))
+  setwd(paste0(home,'/ecosocialData/SuperIndex'))
   for (rdat in dir()){load(rdat)}
   
-  dflist0 = gsub('.Rdata', '', dir(paste0(home,'/ecosocialData/indexSQL'))) #全部都需要预处理
-  dflist = grep('POP|\\d', dflist0, invert=T, value=T) #用来算OLS的
+  dflist0 = gsub('.Rdata', '', dir(paste0(home,'/ecosocialData/SuperIndex'))) #全部都需要预处理
+  #dflist = grep('POP|\\d', dflist0, invert=T, value=T) #用来算OLS的
+  dflist = dflist0[!dflist0 %in% c('POP','Employee1st','Employee2nd','Employee3rd')]
   
   for (yi in 1:length(dflist0)){
     dfname = dflist0[yi]
@@ -115,10 +120,14 @@ for (plan in c('D-XJS', 'T-XJS')){
   } else {modelname = 'OLS2_XJS'}
   
   
+  
+  yearrange = 1985:2018
+  
+  
   ############## OLS
   sumlmHorizontal = data.frame()
   
-  for (yeari in 1985:2017){
+  for (yeari in yearrange){
     Beta = vector()
     Intercept = vector()
     Pvalue = vector()
@@ -135,13 +144,28 @@ for (plan in c('D-XJS', 'T-XJS')){
       rangeStat = rangeStatList[1] #按照指标对应的区域更改
       year = yeari
       xdf = get(xdfname)
-      delcity = c('三沙市')
-      #delcity = c('昌都市','拉萨市','林芝市','日喀则市','山南市','那曲市','三沙市','海东市','儋州市','哈密市','吐鲁番市','重庆市')
-      xdf = xdf[which(!(xdf$city %in% delcity)),]
+	  
+	  ### 操作有没有县级市
+	  if (WithoutXJS){xdf = xdf[!grepl('县级',xdf$admin),]}
+	  
       ydf = get(ydfname)
+	  
+	  ### 操作有没有市辖区，并找到对应POP年份的Y指标数值
       ORII = xdf[grepl(rangeStat, xdf$index) & xdf$year==year,]
       CORR = ydf[grepl(rangeStat, ydf$index) & ydf$year==year,]
       cordf = SearchCorValue(ORII, CORR)
+	  
+	  
+	  a = unique(ORII$city)
+	  b = adminchange[!grepl('县级',adminchange$admin)&adminchange$yeari==1985,'cityshi']
+	  x = xdf[xdf$city=='天水市',]
+	  
+	  
+	  
+	  
+	  
+	  
+	  ### 
       if (sum(is.na(cordf))>=dim(cordf)[1] | dim(na.omit(cordf))[1]<130){
         Beta[yi] = NA
         Intercept[yi] = NA
@@ -225,11 +249,11 @@ for (plan in c('D-XJS', 'T-XJS')){
   #   dev.off()
   # }
   # 
-  # ylists = c('Book','Bus','BusPassenger','Crash','Deposit','DepositHousehold','Fire','FixedAssets','GDP','Loan','Passenger','PostTele','Retail','Salary','WasteWater')
+  # ylists = c('Book','Bus','BusPassenger','Crash','Deposit','DepositHousehold','Fire','FixedAssets','Employee','Loan','Passenger','PostTele','Retail','Salary','WasteWater')
   # ylisti = c('Cinema', 'CityRoadArea','Doctor','Gas.Length','Green','GreenBuilt','Hospital','HospitalBerth','School','PavedRoad.Length','PrimarySchool','PrimaryTeacher','School','Sewage.Length','WaterSupply.Length')
   # yliste = c('Electricity','ElectricityResident','Water','LivingSpace','Water','WaterResident')
   # ylista = c('Area', 'AreaBuilt')
-  # #ylists = c('GDP', 'Salary', 'DepositHousehold') #'Book', 'PostTele'
+  # #ylists = c('Employee', 'Salary', 'DepositHousehold') #'Book', 'PostTele'
   # #ylisti = c('CityRoadArea','Hospital')  #'HospitalBerth'
   # #yliste = c('Electricity', 'Water')
   # #ylista = c('Area', 'AreaBuilt')
