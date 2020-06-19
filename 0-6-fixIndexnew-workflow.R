@@ -39,7 +39,7 @@ IDDELF = function(ddat){
 }
 
 ### 去除异常值
-FunOutliers = function(dfi, t=1.8, times=8, dfname, rangeStat){
+FunOutliers = function(dfi, t=2.5, times=8, dfname, rangeStat){
   dir.create("C:/Sync/CoolGirl/Fhe/ecosocialDATA/outliers/",showWarnings = F)
   file.remove(dir("C:/Sync/CoolGirl/Fhe/ecosocialDATA/outliers/"),showWarnings = F)
   dir.create(paste0("C:/Sync/CoolGirl/Fhe/ecosocialDATA/outliers/",dfname,"/"),showWarnings = F)
@@ -55,10 +55,20 @@ FunOutliers = function(dfi, t=1.8, times=8, dfname, rangeStat){
 	#s=Sys.time()
 	
     for (ic in 1:length(citylist)){
-      #ic = which(citylist=='北京市')
+      #ic = which(citylist=='昆山市')
 	  cityi0 = citylist[ic]
       dati = dfi[which(dfi$city == cityi0 & grepl(rangeStat,dfi$index)),]
       dat0 = na.omit(dati)
+	  
+	  w0 = dat0$value<=0
+	  if (sum(w0)>0){
+		outs = rbind(outs, dat0[w0,])
+	    dfi[which(dfi$id == dat0[w0,]$id),]$value = NA
+	    dat0 = dat0[!w0,]
+	  }
+	  
+	  dat0$value = log(dat0$value)
+	  
       if (dim(dat0)[1]<=6){
         rarecity = c(rarecity, cityi0)
 		#setTxtProgressBar(pb, ic/length(citylist))
@@ -68,7 +78,7 @@ FunOutliers = function(dfi, t=1.8, times=8, dfname, rangeStat){
         m = mean(head(dat0)$value)
         s = sd(head(dat0)$value)
         if (dat0$value[ni] > m + t*s | dat0$value[ni] < m - t*s){
-          outs = rbind(outs, dat0[ni,])
+          outs = rbind(outs, dati[ni,])
           dfi[which(dfi$id == dat0[ni,]$id),]$value = NA
         }
       }
@@ -76,7 +86,7 @@ FunOutliers = function(dfi, t=1.8, times=8, dfname, rangeStat){
         m = mean(dat0[c((nj-3),(nj-2),(nj-1),nj,(nj+1),(nj+2)),]$value)
         s = sd(dat0[c((nj-3),(nj-2),(nj-1),nj,(nj+1),(nj+2)),]$value)
         if (dat0$value[nj] > m + t*s | dat0$value[nj] < m - t*s){
-          outs = rbind(outs, dat0[nj,])
+          outs = rbind(outs, dati[nj,])
           dfi[which(dfi$id == dat0[nj,]$id),]$value = NA
         }
       }
@@ -85,7 +95,7 @@ FunOutliers = function(dfi, t=1.8, times=8, dfname, rangeStat){
         m = mean(tail(dat0)$value)
         s = sd(tail(dat0)$value)
         if (dat0$value[nk] > m + t*s | dat0$value[nk] < m - t*s){
-          outs = rbind(outs, dat0[nk,])
+          outs = rbind(outs, dati[nk,])
           dfi[which(dfi$id == dat0[nk,]$id),]$value = NA
         }
       }
@@ -129,6 +139,7 @@ FunImp = function(dfi, dfname, rangeStat){
 	cityi0 = citylist[ic]
     dati = dfi[which(dfi$city == cityi0 & grepl(rangeStat,dfi$index)),]
     dat0 = na.omit(dati)
+	dat0$value=as.numeric(dat0$value)
     
     if (nrow(dat0) < 20){
 	  #setTxtProgressBar(pb, ic/length(citylist))
@@ -137,11 +148,13 @@ FunImp = function(dfi, dfname, rangeStat){
     
     forclus = data.frame(year=yearrange)
     x0 = merge(forclus, dat0, by='year', all=T)[,c('year','value')]
+	x0$value = log(x0$value)
     x0[,1] = as.numeric(x0[,1])
     
     x1 = t(as.matrix(x0))
     x3 = imputation(x1, method='linearInterpol.bisector', lowerBound = 0)
     x4 = as.data.frame(t(x3))
+	x4$value = exp(x4$value)
     x5 = merge(x4, dat0, by='year', all=T)
     dat1 = subset(x5, is.na(x5$city))
     
@@ -346,6 +359,7 @@ uniindex = unique(dfnew$index)
 yearrange = 1985:2018
 
 ugly = grep('(X\\d.\\d)', uniindex, value=T)
+ugly2 = grep('(X\\d)', uniindex, value=T)
 uniindex = uniindex[!uniindex %in% ugly]
 
 
@@ -429,7 +443,7 @@ GDP$value[i3000] = GDP$value[i3000] * 10000
 
 ### 统一指标名称
 GDP = FunIndexName(GDP, '地区生产总值.万元')
-tst = subset(GDP, GDP$city=='重庆市')
+tst = subset(GDP, GDP$city=='武汉市'&grepl('市辖区',GDP$index))
 # 有“按1980年不变价格计算”混在里面，造成异常，但也可以不管
 
 ### 去重，异常值，插补
@@ -574,6 +588,7 @@ GDP23$index = gsub('一','二三',GDP1st$index)
 GDP23$value = 100 - as.numeric(GDP1st$value)
 for (n in 1:ncol(GDP23)){GDP23[,n] = enc2utf8(as.character(GDP23[,n]))}
 save(GDP23, file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/SuperIndex/GDP23.Rdata')
+save(GDP23, file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/SuperIndex_origin/GDP23.Rdata')
 
 
 
@@ -596,7 +611,7 @@ Salary = WorkFlow(Salary, dfn='Salary')
 ##### 3.固定资产投资 #####
 ########################
 indexRequest = grep('(固定资产.*(投资额|投资总额|合计|总计|固定资产投资不))|固定资产投资情况|城镇固定资产', uniindex, value=T)
-indexRequest1 = grep('所有制|规模以上|住宅|房地产|非生产性|个人|新增|城市|(\\.1)|(\\.2)', indexRequest, invert=T, value=T)
+indexRequest1 = grep('所有制|规模以上|住宅|房地产|非生产性|个人|新增|城市|X17', indexRequest, invert=T, value=T)
 ### 1985,1998,1999没有县级市数据
 ### 2002-2010年没有县级市的固定投资总额，只有重点分类完成额
 ### 查了表格，2018统计年鉴真的没有固定资产投资额
@@ -611,10 +626,10 @@ for (num in GDPnum4){
 }
 ### 统一指标名称
 FixedAssets = FunIndexName(FixedAssets, '固定资产投资额.万元')
-tst = subset(FixedAssets, FixedAssets$city=='玉溪市')
+tst = subset(FixedAssets, FixedAssets$city=='北京市')
 
 ### 去重
-FixedAssets[FixedAssets$year %in% 1998:1999 & grepl('市辖区',FixedAssets$index),]$value = FixedAssets[FixedAssets$year %in% 1998:1999 & grepl('市辖区',FixedAssets$index),]$value * 10000
+#FixedAssets[FixedAssets$year %in% 1998:1999 & grepl('市辖区',FixedAssets$index),]$value = FixedAssets[FixedAssets$year %in% 1998:1999 & grepl('市辖区',FixedAssets$index),]$value / 10000
 FixedAssets = WorkFlow(FixedAssets, dfn='FixedAssets')
 
 
@@ -777,22 +792,22 @@ Loan = WorkFlow(Loan, dfn='Loan')
 
 
 
-######  13.火灾 14.交通  ######
-#############################
-ind1 = grep('火灾起', uniindex, value=T)
-ind2 = grep('交通.*件', uniindex, value=T)
+# ######  13.火灾 14.交通  ######
+# #############################
+# ind1 = grep('火灾起', uniindex, value=T)
+# ind2 = grep('交通.*件', uniindex, value=T)
 
-Fire = FunRequest(yearrange, ind1, dfnew$city)
-Crash = FunRequest(yearrange, ind2, dfnew$city)
-tst = subset(Crash, Crash$city == '榆林市')[,-1]
+# Fire = FunRequest(yearrange, ind1, dfnew$city)
+# Crash = FunRequest(yearrange, ind2, dfnew$city)
+# tst = subset(Crash, Crash$city == '榆林市')[,-1]
 
-### 统一指标名称
-Fire$index = '火灾.起.市辖区'
-Crash$index = '交通事故.件.市辖区'
+# ### 统一指标名称
+# Fire$index = '火灾.起.市辖区'
+# Crash$index = '交通事故.件.市辖区'
 
-Fire = WorkFlow(Fire, dfn='Fire')
+# Fire = WorkFlow(Fire, dfn='Fire')
 
-Crash = WorkFlow(Crash, dfn='Crash')
+# Crash = WorkFlow(Crash, dfn='Crash')
 
 
 
@@ -1127,7 +1142,7 @@ AreaBuilt = FunRequest(yearrange, ind2, dfnew$city)
 tst = subset(AreaBuilt, AreaBuilt$city == '榆林市')[,-1]
 
 ### 统一指标名称
-AreaBuilt$index = '建成区土地面积.平方公里.全市.市辖区'
+AreaBuilt$index = '建成区土地面积.平方公里.市辖区'
 
 AreaBuilt = subset(AreaBuilt, !grepl('丰镇市-1992-土地面积人口密度和城市绿化__土地面积平方公里市辖区建成区_单位|百色市-2012-行政区域土地面积及人口密度__建成区面积平方公里市辖区_单位',AreaBuilt$id))
 AreaBuilt = WorkFlow(AreaBuilt, dfn='AreaBuilt')
@@ -1189,7 +1204,7 @@ ERA$index[which(ERA$year=='2001')] = paste0(ERA$index[which(ERA$year=='2001')],'
 
 ### 统一指标名称
 ERA = FunIndexName(ERA, '居民生活用电量.万千瓦时')
-tst = subset(ERA, ERA$city == '上海市')[,-1]
+tst = subset(ERA, ERA$city == '北京市')[,-1]
 
 ### 统一单位
 i100 = 1:dim(ERA)[1]
@@ -1208,7 +1223,7 @@ ERA = subset(ERA, !(ERA$year %in% as.character(1985:1990) & ERA$value > 400000))
 ER = FunRequest(yearrange, elec2, dfnew$city)
 
 ER = FunIndexName(ER, '居民生活用电量.万千瓦时')
-tst = subset(ER, ER$city=='上海市')[,-1]
+tst = subset(ER, ER$city=='北京市')[,-1]
 ER$value[which(ER$year %in% as.character(c(1985:1992)))] = ER$value[which(ER$year %in% as.character(c(1985:1992)))] * 10000
 
 
@@ -1319,7 +1334,7 @@ tst = subset(GreenBuiltA, GreenBuiltA$city == '北京市')[,-1]
 ### 如无意外
 ### 拼接，去重
 GreenBuilt = rbind(GreenBuiltR, GreenBuiltA)
-GreenBuilt$index = '建成区绿地覆盖面积.公顷.全市.市辖区'
+GreenBuilt$index = '建成区绿地覆盖面积.公顷.市辖区'
 GreenBuilt = GreenBuilt[!duplicated(GreenBuilt[,-1]),]
 tst = subset(GreenBuilt, GreenBuilt$city == '北京市')[,-1]
 
@@ -1420,7 +1435,7 @@ ind1 = grep('移动', uniindex, value=T)
 Mobile = FunRequest(yearrange, ind1, dfnew$city)
 tst = subset(Mobile, Mobile$city == '榆林市')[,-1]
 
-Mobile$index = '城市建设用地面积.平方公里.市辖区'
+Mobile$index = '移动电话用户数.平方公里.全市'
 Mobile = WorkFlow(Mobile, dfn='Mobile')
 
 
@@ -1528,6 +1543,7 @@ ydata$index = gsub('土地面积.平方公里', '人口密度.人每平方公里
 ydata$id = paste(ydata$city, ydata$year, ydata$index, let, sep='-')
 POPdensity = ydata
 
+save(POPdensity, file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/SuperIndex/POPdensity.Rdata')
 save(POPdensity, file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/SuperIndex_origin/POPdensity.Rdata')
 
 

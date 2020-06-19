@@ -1,25 +1,34 @@
 library(ggplot2)
 
-RB0 = read.csv(file='C:/Sync/CoolGirl/Fhe/Results/OLS_R/sumlmHorizontal_Districts.csv',header=T)
-PB0 = read.csv(file='C:/Sync/CoolGirl/Fhe/Results/OLS_130/sumlmHorizontal_Districts.csv',header=T)
-RB = RB0[which(RB0$Observation > 180),c(2,3,4,10,12)]
-PB = PB0[which(PB0$year %in% unique(RB0$year) & PB0$Observation > 180),c(2,3,4,10,12)]
+RB0 = read.csv(file='C:/Sync/CoolGirl/Fhe/Results/OLS_DJS_sxq_R/sumlmHorizontal_Districts.csv',header=T,stringsAsFactors=F)
+PB0 = read.csv(file='C:/Sync/CoolGirl/Fhe/Results/OLS_DJS_sxq/sumlmHorizontal_Districts.csv',stringsAsFactors=F)
+RB = RB0[,c(2,3,4,10,11,12,13)]
+PB = PB0[,c(2,3,4,10,11,12,13)]
 RB$R = 'Resident'
 PB$R = 'Registered'
+
+PRBr = rbind(RB,PB)
+
 foo = merge(RB,PB,by=c('yIndex','year'),all=T)
-foo = foo[which(foo$yIndex!='Passenger'),]
+#foo = foo[which(foo$yIndex!='Passenger'),]
 
-col = c("#619CFF", "grey52", "#00BA38", "#F8766D")
-economoicdf = c('Book','BusPassenger','DepositHousehold','GDP','Loan','Salary','PostTele','WasteWater','Bus')
-infrasdf = c('CityRoadArea','Hospital','School','Cinema','Green','HospitalBerth','GreenBuilt')
-needdf = c('Electricity','Water')
+col = c("#619CFF", "#00BA38", "grey52", "#F8766D")
+economoicdf = c('DepositHousehold','GDP','Retail','Salary')
+#'Loan'数据少不要了 #,'Water'R2奇怪 #,'FixedAssets','Electricity'形状一般，不要也罢 #'ForeignCapital'R2低
+infrasdf = c('UrbanRoadArea','Green')
+#,'Bus','WaterSupply.Length') #'Sewage.Length'数据少不要了？#,'WaterResident'R2奇怪 #,'ElectricityResident'有点牵强
+needdf = c('Hospital','HospitalBeds','PrimarySchool','PrimaryTeacher','School')
+#,'Employee','ExpendEdu','ExpendScience','PrimaryStudent') #Doctor波动大, 'LivingSpace'数据少直接不要了算啦，聚类省去插补步骤
 areadf = c('Area', 'AreaBuilt')
+	
 
-foo$type=NA
-foo[foo$yIndex %in% economoicdf,]$type = 'socio-economic'
-foo[foo$yIndex %in% infrasdf,]$type = 'infrastructure'
-foo[foo$yIndex %in% needdf,]$type = 'individual need'
-foo[foo$yIndex %in% areadf,]$type = 'Area'
+foo$type= NA
+foo[foo$yIndex %in% economoicdf,]$type = 'Socio-economic'
+foo[foo$yIndex %in% infrasdf,]$type = 'Infrastructure'
+foo[foo$yIndex %in% needdf,]$type = 'Basic Services'
+foo[foo$yIndex %in% areadf,]$type = 'Land Use'
+foo = na.omit(foo)
+
 
 a = lm(foo$Beta.x~foo$Beta.y) #x是常住人口，y是户籍人口， x常住人口~y户籍人口
 aa = summary(a)
@@ -27,7 +36,7 @@ aa = summary(a)
 #text = paste0('y=', round(aa$coefficients[1,1],3), 'x, R^2=', round(aa$r.squared,3))
 text = paste0('y=', round(aa$coefficients[2,1],3), 'x', round(aa$coefficients[1,1],3), ', R^2=', round(aa$r.squared,3))
 
-png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/OLS_R/Registered&Resident_beta1.png'),
+png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/OLS_DJS_sxq_R/Registered&Resident_beta1.png'),
     width=15,height=15, units='cm',res=150)
 p1 = ggplot(data=foo, aes(x=Beta.y, y=Beta.x, color=type)) + 
   #scale_colour_manual(values = col) +
@@ -39,7 +48,7 @@ p1 = ggplot(data=foo, aes(x=Beta.y, y=Beta.x, color=type)) +
   scale_colour_hue(text) + 
   theme(text = element_text(size=20),
         legend.title=element_text(size = 14, face='italic'),
-        legend.position = c(0.75,0.15),
+        legend.position = c(0.73,0.15),
         legend.text=element_text(size=14),
         panel.grid =element_blank(),                                             #默认主题
         panel.background = element_rect(fill = "transparent",colour = 'black'),  #默认主题
@@ -54,9 +63,9 @@ bb = summary(b)
 
 
 #text = paste0('y=', round(bb$coefficients[1,1],3), 'x, R^2=', round(bb$r.squared,3))
-text = paste0('y=', round(bb$coefficients[2,1],3), 'x', round(bb$coefficients[1,1],3), ', R^2=', round(bb$r.squared,3))
+text = paste0('y=', round(bb$coefficients[2,1],3), 'x+', round(bb$coefficients[1,1],3), ', R^2=', round(bb$r.squared,3))
 
-png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/OLS_R/Registered&Resident_Intercept1.png'),
+png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/OLS_DJS_sxq_R/Registered&Resident_Intercept1.png'),
     width=15,height=15, units='cm',res=150)
 p2 = ggplot(data=foo, aes(x=Intercept.y, y=Intercept.x, color=type)) + 
   #scale_colour_manual(values = col) +
@@ -68,7 +77,7 @@ p2 = ggplot(data=foo, aes(x=Intercept.y, y=Intercept.x, color=type)) +
   scale_colour_hue(text) + 
   theme(text = element_text(size=20),
         legend.title=element_text(size = 14, face='italic'),
-        legend.position = c(0.75,0.15),
+        legend.position = c(0.73,0.15),
         legend.text=element_text(size=14),
         panel.grid =element_blank(),                                             #默认主题
         panel.background = element_rect(fill = "transparent",colour = 'black'),  #默认主题
@@ -90,7 +99,7 @@ rr = summary(r)
 #text = paste0('y=', round(rr$coefficients[1,1],3), 'x, R^2=', round(rr$r.squared,3))
 text = paste0('y=', round(rr$coefficients[2,1],3), 'x+', round(rr$coefficients[1,1],3), ', R^2=', round(rr$r.squared,3))
 
-png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/OLS_R/Registered&Resident_R21.png'),
+png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/OLS_DJS_sxq_R/Registered&Resident_R21.png'),
     width=15,height=15, units='cm',res=150)
 p3 = ggplot(data=foo, aes(x=Rsquare.y, y=Rsquare.x, color=type)) + 
   #scale_colour_manual(values = col) +
@@ -120,8 +129,35 @@ dev.off()
 
 library(ggplot2)
 
-setwd('C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL')
+#home = '/home/zheyi'
+home = 'C:/Sync/CoolGirl/Fhe'
+setwd(paste0(home,'/ecosocialData/SuperIndex'))
 for (rdat in dir()){load(rdat)}
+
+
+dflist0 = gsub('.Rdata', '', dir(paste0(home,'/ecosocialData/SuperIndex'))) #全部都需要预处理
+#dflist = grep('POP|\\d', dflist0, invert=T, value=T) #用来算OLS的
+dflist = dflist0[!dflist0 %in% c('POPResident', 'POPResidentOrigin')]
+
+
+for (yi in 1:length(dflist0)){
+	dfname = dflist0[yi]
+	df = get(dfname)
+	df$year = as.integer(df$year)
+	df$value = as.numeric(df$value)
+	df$value[which(df$value==0)] = NA
+	assign(dfname, df)
+	#eval(parse(text = paste0('return(',dfname, ')')))
+}
+for (yi in 1:length(dflist0)){
+  dfname = dflist0[yi]
+  df = get(dfname)
+  df$year = as.integer(df$year)
+  df$value = as.numeric(df$value)
+  df$value[which(df$value==0)] = NA
+  assign(dfname, df)
+  #eval(parse(text = paste0('return(',dfname, ')')))
+}
 
 POP$year = POP$year-1
 
@@ -168,16 +204,14 @@ SearchCorValue = function(ORI, COR){ #找到某指标对应的另一指标的值
 }
 
 
-xdfname = 'Resident'
+xdfname = 'POPResident'
 ydfname = 'POP'
-if (!grepl('Built', ydfname)){
-  rangeStatList = c('市辖区', 'Districts', 'BetaD/')
-}else{
-  rangeStatList = c('建成区', 'Districts', 'BetaD/')
-}
+rangeStatList = c('市辖区', 'Districts', 'BetaD/')
 rangeStat = rangeStatList[1] #按照指标对应的区域更改
+
 xdf = get(xdfname)
-delcity = c('昌都市','拉萨市','林芝市','日喀则市','山南市','那曲市','三沙市','海东市','儋州市','哈密市','吐鲁番市')
+delcity = '三沙市'
+#delcity = c('昌都市','拉萨市','林芝市','日喀则市','山南市','那曲市','三沙市','海东市','儋州市','哈密市','吐鲁番市')
 xdf = xdf[which(!(xdf$city %in% delcity)),]
 ydf = get(ydfname)
 ORII = xdf[grepl(rangeStat, xdf$index),]
@@ -196,8 +230,8 @@ aa1 = summary(a1)
 text = paste0('y=', round(aa$coefficients[2,1],3), 'x', round(aa$coefficients[1,1],3), ', R^2=', round(aa$r.squared,3))
 
 
-png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/OLS_R/ResidentVSPOP1.png'),width=15,height=15, units='cm',res=150)
-p0 = ggplot(data=cordf, aes(x=log(yindex), y=log(xindex), color=year)) + 
+png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/OLS_DJS_sxq_R/ResidentVSPOP1.png'),width=15,height=15, units='cm',res=150)
+p0 = ggplot(data=cordf, aes(x=log(yindex), y=log(xindex), color=as.factor(year))) + 
   #scale_colour_manual(values = col) +
   #geom_abline(slope=1,intercept=rc,size=1,col='grey') +
   geom_abline(slope=aa$coefficients[2,1],intercept=aa$coefficients[1,1], size=1) +
@@ -223,12 +257,12 @@ respoint = data.frame(city=cordf1$city, year=cordf1$year, Resident=cordf1$xindex
 resorder = respoint[order(respoint$res,decreasing=T),]
 respoint1 = data.frame(city=cordf1$city, year=cordf1$year, Resident=cordf1$xindex, Registered=cordf1$yindex, res=aa1$residuals)
 resorder1 = respoint1[order(respoint1$res,decreasing=T),]
-write.csv(resorder1, file='C:/Sync/CoolGirl/Fhe/Results/OLS_R/ResOrder.csv')
-write.csv(resorder, file='C:/Sync/CoolGirl/Fhe/Results/OLS_R/ResOrder2.csv')
+write.csv(resorder1, file='C:/Sync/CoolGirl/Fhe/Results/OLS_DJS_sxq_R/ResOrder.csv')
+write.csv(resorder, file='C:/Sync/CoolGirl/Fhe/Results/OLS_DJS_sxq_R/ResOrder2.csv')
 
 library(ggpubr)
 
-png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/OLS_R/arrange.png'),width=30,height=30, units='cm',res=300)
+png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/OLS_DJS_sxq_R/arrange.png'),width=30,height=30, units='cm',res=300)
 ggarrange(p0,p1,p2,p3,ncol=2,nrow=2,labels=c("A","B","C","D"))
 dev.off()
 
@@ -255,6 +289,11 @@ at = t.test(foo$Beta.x, foo$Beta.y, paired=T)
 bt = t.test(foo$Intercept.x,foo$Intercept.y,paired=T,alternative = 'less')
 rt = t.test(foo$Rsquare.x,foo$Rsquare.y,paired=T,alternative = 'greater')
 pt = t.test(cordf1$xindex, cordf1$yindex, paired=T,alternative = 'greater')
+
+#at = t.test(foo$Beta.x, foo$Beta.y, paired=T)
+#bt = t.test(foo$Intercept.x,foo$Intercept.y,paired=T)
+#rt = t.test(foo$Rsquare.x,foo$Rsquare.y,paired=T)
+#pt = t.test(cordf1$xindex, cordf1$yindex, paired=T)
 at
 bt
 rt

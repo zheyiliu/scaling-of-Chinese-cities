@@ -1,296 +1,20 @@
 library(ggplot2)
 
-#RB0 = read.csv(file='C:/Sync/CoolGirl/Fhe/Results/OLS_R/200_sumlmHorizontal_Districts.csv',header=T)
-PB0 = read.csv(file='C:/Sync/CoolGirl/Fhe/Results/OLS1_DJS/200_sumlmHorizontal_Districts.csv',header=T)
-RB = RB0[which(RB0$Observation > 180),c(2,3,4,10,12)]
-PB = PB0[which(PB0$year %in% unique(RB0$year) & PB0$Observation > 180),c(2,3,4,10,12)]
-RB$R = 'Resident'
-PB$R = 'Registered'
 
-PRBr = rbind(RB,PB)
-
-foo = merge(RB,PB,by=c('yIndex','year'),all=T)
-foo = foo[which(foo$yIndex!='Passenger'),]
-
-# col = c("#619CFF", "grey52", "#00BA38", "#F8766D")
-# economoicdf = c('Book','BusPassenger','DepositHousehold','GDP','Loan','Salary','PostTele','WasteWater','Bus')
-# infrasdf = c('CityRoadArea','Hospital','School','Cinema','Green','HospitalBerth','GreenBuilt')
-# needdf = c('Electricity','Water')
-# areadf = c('Area', 'AreaBuilt')
-
-col = c("#619CFF", "grey52", "#00BA38", "#F8766D")
-economoicdf = c('Crash','Passenger','Fire','BusPassenger','Book','Deposit','DepositHousehold','Electricity','FixedAssets','GDP','Loan','PostTele','Retail','Salary','WasteWater','Water')
-infrasdf = c('Cinema', 'CityRoadArea','Doctor','Gas.Length','Green','GreenBuilt','Hospital','HospitalBerth','School','PavedRoad.Length','PrimarySchool','PrimaryTeacher','School','Sewage.Length','WaterSupply.Length')
-needdf = c('ElectricityResident','LivingSpace','WaterResident')
-areadf = c('Area', 'AreaBuilt')
-
-foo$type= NA
-foo[foo$yIndex %in% economoicdf,]$type = 'Socio-economic'
-foo[foo$yIndex %in% infrasdf,]$type = 'Infrastructure'
-foo[foo$yIndex %in% needdf,]$type = 'Individual need'
-foo[foo$yIndex %in% areadf,]$type = 'Area'
-foo = na.omit(foo)
-
-a = lm(foo$Beta.x~foo$Beta.y) #x是常住人口，y是户籍人口， x常住人口~y户籍人口
-aa = summary(a)
-
-#text = paste0('y=', round(aa$coefficients[1,1],3), 'x, R^2=', round(aa$r.squared,3))
-text = paste0('y=', round(aa$coefficients[2,1],3), 'x', round(aa$coefficients[1,1],3), ', R^2=', round(aa$r.squared,3))
-
-png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/OLS_R/Registered&Resident_beta1.png'),
-    width=15,height=15, units='cm',res=150)
-p1 = ggplot(data=foo, aes(x=Beta.y, y=Beta.x, color=type)) + 
-  #scale_colour_manual(values = col) +
-  #geom_abline(size=1,col='grey') +
-  geom_abline(slope=aa$coefficients[2,1],intercept=aa$coefficients[1,1], size=1) +
-  #geom_abline(slope=aa$coefficients[1,1],size=1) +
-  geom_point(size = 3.5) +
-  labs(x='β (Registered)', y='β (Resident)') +
-  scale_colour_hue(text) + 
-  theme(text = element_text(size=20),
-        legend.title=element_text(size = 14, face='italic'),
-        legend.position = c(0.75,0.15),
-        legend.text=element_text(size=14),
-        panel.grid =element_blank(),                                             #默认主题
-        panel.background = element_rect(fill = "transparent",colour = 'black'),  #默认主题
-        legend.key = element_rect(fill = "transparent", color = "transparent"),  #默认主题
-        #axis.line = element_line(colour = "black"),
-        axis.text.x = element_text(angle = 0, hjust = 0.7, vjust = 0.5))
-print(p1)
-dev.off()
-
-b = lm(foo$Intercept.x~foo$Intercept.y)
-bb = summary(b)
-
-
-#text = paste0('y=', round(bb$coefficients[1,1],3), 'x, R^2=', round(bb$r.squared,3))
-text = paste0('y=', round(bb$coefficients[2,1],3), 'x', round(bb$coefficients[1,1],3), ', R^2=', round(bb$r.squared,3))
-
-png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/OLS_R/Registered&Resident_Intercept1.png'),
-    width=15,height=15, units='cm',res=150)
-p2 = ggplot(data=foo, aes(x=Intercept.y, y=Intercept.x, color=type)) + 
-  #scale_colour_manual(values = col) +
-  #geom_abline(slope=1,intercept=c,size=1,col='grey') +
-  geom_abline(slope=bb$coefficients[2,1],intercept=bb$coefficients[1,1], size=1) +
-  #geom_abline(slope=bb$coefficients[1,1], size=1) +
-  geom_point(size = 3.5) +
-  labs(x='Intercept (Registered)', y='Intercept (Resident)') +
-  scale_colour_hue(text) + 
-  theme(text = element_text(size=20),
-        legend.title=element_text(size = 14, face='italic'),
-        legend.position = c(0.75,0.15),
-        legend.text=element_text(size=14),
-        panel.grid =element_blank(),                                             #默认主题
-        panel.background = element_rect(fill = "transparent",colour = 'black'),  #默认主题
-        legend.key = element_rect(fill = "transparent", color = "transparent"),  #默认主题
-        #axis.line = element_line(colour = "black"),
-        axis.text.x = element_text(angle = 0, hjust = 0.7, vjust = 0.5))
-print(p2)
-dev.off()
-
-
-r = lm(foo$Rsquare.x~foo$Rsquare.y)
-rr = summary(r)
-# rc = mean(na.omit(foo$Rsquare.x))-mean(na.omit(foo$Rsquare.y))
-# Ry = foo$Rsquare.y+rc
-# r1 = lm(foo$Rsquare.x~Ry-1)
-# rr1 = summary(r1)
-
-
-#text = paste0('y=', round(rr$coefficients[1,1],3), 'x, R^2=', round(rr$r.squared,3))
-text = paste0('y=', round(rr$coefficients[2,1],3), 'x+', round(rr$coefficients[1,1],3), ', R^2=', round(rr$r.squared,3))
-
-png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/OLS_R/Registered&Resident_R21.png'),
-    width=15,height=15, units='cm',res=150)
-p3 = ggplot(data=foo, aes(x=Rsquare.y, y=Rsquare.x, color=type)) + 
-  #scale_colour_manual(values = col) +
-  #geom_abline(slope=1,intercept=rc,size=1,col='grey') +
-  geom_abline(slope=rr$coefficients[2,1],intercept=rr$coefficients[1,1], size=1) +
-  #geom_abline(slope=rr$coefficients[1,1], size=1) +
-  geom_point(size = 3.5) +
-  labs(x='R-square (Registered)', y='R-square (Resident)') +
-  scale_colour_hue(text) + 
-  theme(text = element_text(size=20),
-        legend.title=element_text(size = 14, face='italic'),
-        legend.position = c(0.73,0.15),
-        legend.text=element_text(size=14),
-        panel.grid =element_blank(),                                             #默认主题
-        panel.background = element_rect(fill = "transparent",colour = 'black'),  #默认主题
-        legend.key = element_rect(fill = "transparent", color = "transparent"),  #默认主题
-        #axis.line = element_line(colour = "black"),
-        axis.text.x = element_text(angle = 0, hjust = 0.7, vjust = 0.5))
-print(p3)
-dev.off()
-
-
-#########################################################
-#########################################################
-#########################################################
-
-
-library(ggplot2)
-
-#home = '/home/zheyi'
-home = 'C:/Sync/CoolGirl/Fhe'
-setwd(paste0(home,'/ecosocialData/indexSQL'))
-for (rdat in dir()){load(rdat)}
-
-for (yi in 1:length(dflist0)){
-  dfname = dflist0[yi]
-  df = get(dfname)
-  df$year = as.integer(df$year)
-  df$value = as.numeric(df$value)
-  df$value[which(df$value==0)] = NA
-  assign(dfname, df)
-  #eval(parse(text = paste0('return(',dfname, ')')))
-}
-
-POP$year = POP$year-1
-
-# Resident$value = Resident$value/10000
-# Resident[which(Resident$city=='六盘水市'&Resident$year==2000),]$value = 99.5055
-# Resident[which(Resident$city=='海口市'&Resident$year==1990),]$value = 41.0050
-# Resident[which(Resident$city=='三亚市'&Resident$year==1990),]$value = 37.0244
-# save(Resident, file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/indexSQL/POPResident.Rdata')
-
-IDDELF = function(ddat){ #手动去掉一个年份多个数据的情况
-  iddelf = vector()
-  f= ddat[duplicated(ddat[,c(-1,-5)]),]
-  for (i in 1:dim(f)[1]){
-    ff = subset(ddat,ddat$city==f$city[i] & ddat$year==f$year[i] & ddat$index==f$index[i])
-    if (sum(is.na(ff$value))==1){iddelf = c(iddelf, ff$id[is.na(ff$value)])
-    }else{iddelf = c(iddelf, ff$id[1])}
-  }
-  ddat = ddat[which(!ddat$id %in% iddelf),]
-  return(ddat)
-}
-
-SearchCorValue = function(ORI, COR){ #找到某指标对应的另一指标的值
-  ORI = IDDELF(ORI)
-  COR = IDDELF(COR)
-  corValue = vector()
-  for (i100i in 1:dim(ORI)[1]){
-    cityL = COR$city==ORI$city[i100i]
-    yearL = COR$year==ORI$year[i100i]
-    corrr = COR[which(cityL & yearL),]
-    corV = corrr$value
-    if (length(corV)==0){
-      corV = NA}
-    if (length(corV)>1){
-      print(corrr)
-      corV = corV[1]}
-    corValue[i100i] = corV
-  }
-  if (length(ORI$value)==0){
-    corValueDF = data.frame(NA)
-  }else{
-    corValueDF = data.frame(xindex = ORI$value, yindex = corValue, city=ORI$city, year=ORI$year)
-  }
-  return(corValueDF)
-}
-
-
-xdfname = 'POPResident'
-ydfname = 'POP'
-if (!grepl('Built', ydfname)){
-  rangeStatList = c('市辖区', 'Districts', 'BetaD/')
-}else{
-  rangeStatList = c('建成区', 'Districts', 'BetaD/')
-}
-rangeStat = rangeStatList[1] #按照指标对应的区域更改
-xdf = get(xdfname)
-delcity = c('昌都市','拉萨市','林芝市','日喀则市','山南市','那曲市','三沙市','海东市','儋州市','哈密市','吐鲁番市')
-xdf = xdf[which(!(xdf$city %in% delcity)),]
-ydf = get(ydfname)
-ORII = xdf[grepl(rangeStat, xdf$index),]
-CORR = ydf[grepl(rangeStat, ydf$index),]
-cordf = SearchCorValue(ORII, CORR)
-
-data = data.frame(Y = log(cordf$yindex), X = log(cordf$xindex), city = cordf$city, year = cordf$year)
-
-a = lm(log(cordf$xindex)~log(cordf$yindex))
-aa = summary(a)
-a1 = lm(log(cordf$xindex)~log(cordf$yindex)-1)
-aa1 = summary(a1)
-
-
-#text = paste0('y=', round(aa1$coefficients[1,1],3), 'x', ', R^2=', round(aa1$r.squared,3))
-text = paste0('y=', round(aa$coefficients[2,1],3), 'x', round(aa$coefficients[1,1],3), ', R^2=', round(aa$r.squared,3))
-
-
-png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/OLS_R/ResidentVSPOP1.png'),width=15,height=15, units='cm',res=150)
-p0 = ggplot(data=cordf, aes(x=log(yindex), y=log(xindex), color=as.factor(year))) + 
-  #scale_colour_manual(values = col) +
-  #geom_abline(slope=1,intercept=rc,size=1,col='grey') +
-  geom_abline(slope=aa$coefficients[2,1],intercept=aa$coefficients[1,1], size=1) +
-  #geom_abline(slope=aa1$coefficients[1,1], size=1) +
-  geom_point(size = 3.5, alpha=0.6) +
-  labs(x='Registered Population (log)', y='Resident Population (log)') +
-  scale_colour_hue(text) + 
-  theme(text = element_text(size=20),
-        legend.title=element_text(size = 14, face='italic'),
-        legend.position = c(0.73,0.15),
-        legend.text=element_text(size=14),
-        panel.grid =element_blank(),                                             #默认主题
-        panel.background = element_rect(fill = "transparent",colour = 'black'),  #默认主题
-        legend.key = element_rect(fill = "transparent", color = "transparent"),  #默认主题
-        #axis.line = element_line(colour = "black"),
-        #axis.title.x = element_text(vjust = -2, hjust = 0.5),
-        axis.text.x = element_text(angle = 0, hjust = 0.7, vjust = 0.5))
-print(p0)
-dev.off()
-
-cordf1 = na.omit(cordf)
-respoint = data.frame(city=cordf1$city, year=cordf1$year, Resident=cordf1$xindex, Registered=cordf1$yindex, res=aa$residuals)
-resorder = respoint[order(respoint$res,decreasing=T),]
-respoint1 = data.frame(city=cordf1$city, year=cordf1$year, Resident=cordf1$xindex, Registered=cordf1$yindex, res=aa1$residuals)
-resorder1 = respoint1[order(respoint1$res,decreasing=T),]
-write.csv(resorder1, file='C:/Sync/CoolGirl/Fhe/Results/OLS_R/ResOrder.csv')
-write.csv(resorder, file='C:/Sync/CoolGirl/Fhe/Results/OLS_R/ResOrder2.csv')
-
-library(ggpubr)
-
-png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/OLS_R/arrange.png'),width=30,height=30, units='cm',res=300)
-ggarrange(p0,p1,p2,p3,ncol=2,nrow=2,labels=c("A","B","C","D"))
-dev.off()
-
-#ggplot2.multiplot(p0, p1,p2,p3, cols=2, row=2)
-
-
-#############################################################
-#############################################################
-#############################################################
-
-cordf1df = split(cordf1, cordf1$year)
-f1990 = lm(log(cordf1df[[1]]$xindex) ~ log(cordf1df[[1]]$yindex) - 1)
-summary(f1990)
-f2000 = lm(log(cordf1df[[2]]$xindex) ~ log(cordf1df[[2]]$yindex) - 1)
-summary(f2000)
-f2010 = lm(log(cordf1df[[3]]$xindex) ~ log(cordf1df[[3]]$yindex) - 1)
-summary(f2010)
-
-exp(0.072/1.024348) #1990, 1.0096
-exp(0.072/1.117447) #2000, 1.0189
-exp(0.072/1.219515) #2010, 1.0236
-
-at = t.test(foo$Beta.x, foo$Beta.y, paired=T)
-bt = t.test(foo$Intercept.x,foo$Intercept.y,paired=T,alternative = 'less')
-rt = t.test(foo$Rsquare.x,foo$Rsquare.y,paired=T,alternative = 'greater')
-pt = t.test(cordf1$xindex, cordf1$yindex, paired=T,alternative = 'greater')
-at
-bt
-rt
-pt
+dir.create(paste0("C:/Sync/CoolGirl/Fhe/Results/",modelname,"/R2plot/"),showWarnings = F)
+setwd(paste0("C:/Sync/CoolGirl/Fhe/Results/",modelname,"/R2plot/"))
+file.remove(dir())
 
 #####################################################################
 #####################################################################
 
 library(ggplot2)
 home = 'C:/Sync/CoolGirl/Fhe'
-modelname='OLS1_DJS_recal'
+modelname='OLS_DJS_sxq'
 setwd(paste0(home, '/Results/',modelname))
 rangeStatList = c('市辖区', 'Districts', 'BetaD/')
-load(paste0('200_sumlmHorizontal_type_',rangeStatList[2],'.Rdata'))
+sumlmHorizontal = read.csv(file=paste0('sumlmHorizontal_type_',rangeStatList[2],'.csv'),stringsAsFactors=F)
+
 sumlmHorizontal = na.omit(sumlmHorizontal)
 sumlmHorizontal = sumlmHorizontal[!is.na(sumlmHorizontal$type),]
 
@@ -299,50 +23,22 @@ ins = c(0.93,0.94,0.75,0.87)
 need = c(0.99,0.98,0.88,0.91,0.96)
 area = c(0.87,0.62,0.74,0.84)
 all0 = c(gdp, ins, need, area)
-alldf = data.frame(Rsquare=all0, year='Previous',
+alldf = data.frame(Rsquare=all0, year='Previous', yIndex=NA,
                    type=c(rep('Socio-economic',length(gdp)),rep('Infrastructure',length(ins)),
                           rep('Basic Services',length(need)),rep('Land Use',length(area))))
 col1 = c(rep(NA,4),'red')
 
-#' col = c("#619CFF", "grey52", "#00BA38", "#F8766D")
-#' economoicdf = c('Book','Deposit','DepositHousehold','Electricity','FixedAssets','GDP','Loan','PostTele','Retail','Salary','WasteWater','Water')
-#' infrasdf = c('Cinema', 'CityRoadArea','Doctor','Gas.Length','Green','GreenBuilt','Hospital','HospitalBerth','School','PavedRoad.Length','PrimarySchool','PrimaryTeacher','School','Sewage.Length','WaterSupply.Length')
-#' needdf = c('ElectricityResident','LivingSpace','WaterResident')
-#' areadf = c('Area', 'AreaBuilt')
-#' 
-#' sumlmHorizontal$type=NA
-#' sumlmHorizontal[sumlmHorizontal$yIndex %in% economoicdf,]$type = 'socio-economic'
-#' sumlmHorizontal[sumlmHorizontal$yIndex %in% infrasdf,]$type = 'infrastructure'
-#' sumlmHorizontal[sumlmHorizontal$yIndex %in% needdf,]$type = 'individual-need'
-#' sumlmHorizontal[sumlmHorizontal$yIndex %in% areadf,]$type = 'area'
-#' a = aggregate(sumlmHorizontal$Rsquare, by=list(sumlmHorizontal$type), FUN=mean)
-#' 
-#' col = c("#619CFF", "#00BA38", "grey52", "#F8766D")
-#' economoicdf = c('Book','DepositHousehold','Electricity','FixedAssets','GDP','Loan','Retail','Salary','WasteWater','Water') 
-#' #最先扔掉的'Passenger', 'BusPassenger', 'Cinema', 'PostTele', 'Crash','Fire','Deposit'
-#' infrasdf = c('CityRoadArea','Sewage.Length','Green')
-#' #'Gas.Length','PavedRoad.Length','WaterSupply.Length','Bus'
-#' needdf = c('LivingSpace','Doctor','Hospital','HospitalBerth','PrimarySchool','PrimaryTeacher')
-#' #'ElectricityResident','WaterResident','School'
-#' areadf = c('Area', 'AreaBuilt')
-#' 
-#' sumlmHorizontal$type=NA
-#' sumlmHorizontal[sumlmHorizontal$yIndex %in% needdf,]$type = 'Basic Services'
-#' sumlmHorizontal[sumlmHorizontal$yIndex %in% infrasdf,]$type = 'Infrastructure'
-#' sumlmHorizontal[sumlmHorizontal$yIndex %in% areadf,]$type = 'Land Use'
-#' sumlmHorizontal[sumlmHorizontal$yIndex %in% economoicdf,]$type = 'Socio-economic'
-#' 
 
+chooseyear = c(1987,1997,2007,2017)
 
-PB0 = sumlmHorizontal[,c('Rsquare','year','type')]
-PB0 = na.omit(PB0)
-PB1 = subset(PB0, PB0$year %in% c(1987,1997,2007,2017))
+PB0 = sumlmHorizontal[,c('Rsquare','year','type','yIndex')]
+PB1 = subset(PB0, PB0$year %in% chooseyear)
 PB1$year = PB1$year - 1
 PB2 = rbind(PB1, alldf)
 
 a = aggregate(sumlmHorizontal$Rsquare, by=list(sumlmHorizontal$type),mean)
 
-png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/',modelname,'/R2Boxplot1facet33.png'),
+png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/',modelname,'/R2plot/R2Boxplot1facet33.png'),
     width=24,height=8, units='cm',res=180)
 p = ggplot(data = PB2,aes(x = as.factor(year), y = Rsquare)) +
   #geom_boxplot(fill=col1) +
@@ -365,7 +61,7 @@ p = ggplot(data = PB2,aes(x = as.factor(year), y = Rsquare)) +
 print(p)
 dev.off()
 
-png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/',modelname,'/R2Boxplot2facet33.png'),
+png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/',modelname,'/R2plot/R2Boxplot2facet33.png'),
     width=16,height=15, units='cm',res=180)
 p = ggplot(data = PB2,aes(x = as.factor(year), y = Rsquare)) +
   #geom_boxplot(fill=col1) +
@@ -388,7 +84,7 @@ p = ggplot(data = PB2,aes(x = as.factor(year), y = Rsquare)) +
 print(p)
 dev.off()
 
-png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/',modelname,'/R2Boxplot2facet333.png'),
+png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/',modelname,'/R2plot/R2Boxplot2facet333.png'),
     width=16,height=15, units='cm',res=180)
 p = ggplot(data = PB2,aes(x = as.factor(year), y = Rsquare)) +
   #geom_boxplot(fill=col1) +
@@ -407,7 +103,7 @@ p = ggplot(data = PB2,aes(x = as.factor(year), y = Rsquare)) +
 print(p)
 dev.off()
 
-png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/',modelname,'/R2Boxplot1facet333.png'),
+png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/',modelname,'/R2plot/R2Boxplot1facet333.png'),
     width=24,height=8, units='cm',res=180)
 p = ggplot(data = PB2,aes(x = as.factor(year), y = Rsquare)) +
   #geom_boxplot(fill=col1) +
@@ -426,7 +122,7 @@ p = ggplot(data = PB2,aes(x = as.factor(year), y = Rsquare)) +
 print(p)
 dev.off()
 
-png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/',modelname,'/R2Boxplot1333.png'),
+png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/',modelname,'/R2plot/R2Boxplot1333.png'),
     width=16,height=15, units='cm',res=180)
 p = ggplot(data = PB2,aes(x = as.factor(year), y = Rsquare)) +
   geom_boxplot(fill=col1) +
@@ -445,7 +141,8 @@ p = ggplot(data = PB2,aes(x = as.factor(year), y = Rsquare)) +
 print(p)
 dev.off()
 
-png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/',modelname,'/R2Boxplot2.png'),
+col = c("#619CFF", "#00BA38", "grey52", "#F8766D") 
+png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/',modelname,'/R2plot/R2Boxplot2.png'),
     width=16,height=15, units='cm',res=180)
 p = ggplot(data = foo,aes(x = type, y = Rsquare.y)) +
   geom_boxplot(fill=col) +
@@ -461,8 +158,9 @@ print(p)
 dev.off()
 
 a = aggregate(sumlmHorizontal$Rsquare, by=list(sumlmHorizontal$year),mean)
+#a = aggregate(sumlmHorizontal$Observation/sumlmHorizontal$ObservationAll, by=list(sumlmHorizontal$year),mean)
 
-png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/',modelname,'/R2points.png'),
+png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/',modelname,'/R2plot/R2points.png'),
     width=16,height=15, units='cm',res=180)
 p = ggplot(data = a,aes(x = Group.1, y = x)) +
   geom_point(size=3) +
@@ -478,3 +176,65 @@ p = ggplot(data = a,aes(x = Group.1, y = x)) +
 print(p)
 dev.off()
 
+ty = unique(PB1$type)
+PB2 = PB1[PB1$type==ty[2],]
+sp = split(PB2,PB2$yIndex)
+r2df = data.frame(year=chooseyear-1)
+for (i in 1:length(sp)){
+	r2df = cbind(r2df, sp[[i]][1])
+}
+colnames(r2df) = names(sp)
+
+
+
+#####################################
+# R2 lines facet
+
+png(filename=paste0(home, '/Results/',modelname,'/R2plot/R2indexfacet1.png'),
+	width=32,height=16, units='cm',res=180)
+sumlmHorizontal1 = sumlmHorizontal[sumlmHorizontal$year %in% chooseyear, ]
+pn4 = ggplot(data=sumlmHorizontal1, aes(x=year-1, y=Rsquare, color=yIndex)) + 
+geom_line(size=3,alpha=0.4, na.rm=T) + 
+geom_point(size=2, na.rm=T) +
+geom_hline(yintercept = 0.5, alpha=0.4, color=1, lwd=1, lty=2) +
+facet_wrap(.~type,nrow=1) +
+scale_x_continuous(breaks=chooseyear-1) +
+ylim(0, 1) +
+labs(x = 'Year', y='R-square') +
+	theme(
+	  text = element_text(size=18),
+	  panel.background = element_rect(fill = "transparent",colour = 'black'), 
+	  panel.grid.minor = element_line(color=NA), 
+	  panel.grid.major = element_line(color=NA),
+	  legend.position = "none",
+	  axis.text.x = element_text(angle = 90, hjust = 1)
+	)
+print(pn4)
+dev.off()
+
+# R2 lines type
+for (tyi in ty){
+	png(filename=paste0(home, '/Results/',modelname,'/R2plot/R2index2',tyi,'.png'),
+		width=16,height=16, units='cm',res=180)
+	PBi = sumlmHorizontal[sumlmHorizontal$type==tyi & sumlmHorizontal$year %in% chooseyear, ]
+	pn4 = ggplot(data=PBi, aes(x=year-1, y=Rsquare, color=yIndex)) + 
+	geom_line(size=3,alpha=0.4, na.rm=T) + 
+	geom_point(size=2, na.rm=T) +
+	geom_hline(yintercept = 0.5, alpha=0.4, color=1, lwd=1, lty=2) +
+	facet_wrap(.~type,nrow=1) +
+	scale_x_continuous(breaks=chooseyear-1) +
+	ylim(0, 1) +
+	labs(x = 'Year', y='R-square') +
+		theme(
+		  text = element_text(size=18),
+		  panel.background = element_rect(fill = "transparent",colour = 'black'), 
+		  panel.grid.minor = element_line(color=NA), 
+		  panel.grid.major = element_line(color=NA),
+		  legend.key = element_rect(fill = "transparent", color = "transparent"), 
+		  #plot.background = element_rect(fill = "transparent",colour = NA),
+		  legend.title=element_blank(),
+		)
+	print(pn4)
+	dev.off()
+}
+	

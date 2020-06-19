@@ -197,7 +197,7 @@ y1993 = rbind(y1993[,c(1:2)],y1993[,c(4:5)])
 y1993$admin1993 = paste0(y1993$admin1993, '市')
 y1993 = merge(y1993, last, by='城市名称', all.x=T)
 y1993 = Clean(y1993)
-write.csv(y1993, paste0('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/admin1993.csv'), row.names=F)
+write.csv(y1993, paste0('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/AdminLevel-origin/admin1993.csv'), row.names=F)
 #y1993[!y1993[,1]%in%a4[,1],]
 ## 手动改1993有变化的城市 
 
@@ -240,7 +240,7 @@ a4[!a4[,1]%in%a2[,1],]
 
 cat(length(unique(a1[,1])), length(unique(a2[,1])), length(unique(a4[,1])))
 
-write.csv(a4, paste0('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/admin',yeari,'.csv'), row.names=F)
+write.csv(a4, paste0('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/AdminLevel-origin/admin',yeari,'.csv'), row.names=F)
 
 
 
@@ -271,7 +271,7 @@ y1993 = rbind(y1993[,c(1:2)],y1993[,c(4:5)],y1993[,c(7:8)])
 if(sum(grepl('市',y1993[,2])) < 20){y1993[,2] = paste0(y1993[,2], '市')}
 y1993 = Clean(y1993)
 
-write.csv(y1993, paste0('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/admin',yeari,'.csv'), row.names=F)
+write.csv(y1993, paste0('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/AdminLevel-origin/admin',yeari,'.csv'), row.names=F)
 
 
 # 2001 - 2003, 行政级别在非农业人口之后
@@ -296,7 +296,7 @@ y1993 = rbind(y1993[,c(1,3)],y1993[,c(4,6)],y1993[,c(7,9)])
 if(sum(grepl('市',y1993[,2])) < 20){y1993[,2] = paste0(y1993[,2], '市')}
 y1993 = Clean(y1993)
 
-write.csv(y1993, paste0('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/admin',yeari,'.csv'), row.names=F)
+write.csv(y1993, paste0('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/AdminLevel-origin/admin',yeari,'.csv'), row.names=F)
 
 
 
@@ -331,7 +331,7 @@ allcity = rbind(zcity,dcity,xcity)
 allcity = Clean(allcity)
 allcity[,1] = gsub('市\\b','',allcity[,1])
 colnames(allcity) = c('城市名称', paste0('admin',yeari))
-write.csv(allcity, paste0('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/admin',yeari,'.csv'), row.names=F)
+write.csv(allcity, paste0('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/AdminLevel-origin/admin',yeari,'.csv'), row.names=F)
 
 yeari = 2014
 f = 'super-中国城市统计年鉴-2014-1-2分地区城市情况一览表nkqi.csv'
@@ -347,7 +347,7 @@ allcity = rbind(zcity,dcity,xcity)
 allcity = Clean(allcity)
 allcity[,1] = gsub('市\\b','',allcity[,1])
 colnames(allcity) = c('城市名称', paste0('admin',yeari))
-write.csv(allcity, paste0('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/admin',yeari,'.csv'), row.names=F)
+write.csv(allcity, paste0('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/AdminLevel-origin/admin',yeari,'.csv'), row.names=F)
 
 
 
@@ -386,7 +386,7 @@ for (yeari in c(2008, 2011:2013, 2015:2018)){
 	)
 	here = unique(Clean(here))
 	colnames(here)[2] = paste0('admin',yeari)
-	write.csv(here, paste0('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/admin',yeari,'.csv'), row.names=F)
+	write.csv(here, paste0('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/AdminLevel-origin/admin',yeari,'.csv'), row.names=F)
 }
 
 
@@ -394,7 +394,7 @@ for (yeari in c(2008, 2011:2013, 2015:2018)){
 ### 最后一起清洗，合并出所有年份的城市名单
 adminallyear = data.frame()
 for (yeari in 1985:2018){
-	admindf = read.csv(file=paste0('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/admin',yeari,'.csv'),header=T,stringsAsFactors = FALSE)
+	admindf = read.csv(file=paste0('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/AdminLevel-origin/admin',yeari,'.csv'),header=T,stringsAsFactors = FALSE)
 	adminyi = unique(Clean(admindf))
 	write.csv(adminyi, paste0('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/AdminLevel/admin',yeari,'.csv'), row.names=F)
 	

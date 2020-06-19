@@ -1,9 +1,35 @@
 ######################################################
 
+#home = '/home/zheyi'
+home = 'C:/Sync/CoolGirl/Fhe'
+setwd(paste0(home,'/ecosocialData/SuperIndex'))
+for (rdat in dir()){load(rdat)}
+
+dflist0 = gsub('.Rdata', '', dir(paste0(home,'/ecosocialData/SuperIndex'))) #全部都需要预处理
+#dflist = grep('POP|\\d', dflist0, invert=T, value=T) #用来算OLS的
+dflist = dflist0[!dflist0 %in% c('POP')]
+
+for (yi in 1:length(dflist0)){
+	dfname = dflist0[yi]
+	df = get(dfname)
+	df$year = as.integer(df$year)
+	df$value = as.numeric(df$value)
+	df$value[which(df$value==0)] = NA
+	assign(dfname, df)
+	#eval(parse(text = paste0('return(',dfname, ')')))
+}
+
+yearrange = 1985:2018
+adminchange = read.csv('C:/Sync/CoolGirl/Fhe/ecosocialDATA/原始数据/AdminLevel/adminchange.csv',header=T,stringsAsFactors=F)
+
+
+
+s=Sys.time()
+
 ### 每个指标每年一个beta
 ### 去除同年同城市同指标的不同数值的情况
 IDDELF = function(ddat){
-  #ddat = Employee
+  #ddat = GDP
   ddat = na.omit(ddat)
   ddat = ddat[!duplicated(ddat),]
   iddelf = vector()
@@ -58,70 +84,45 @@ library(ggplot2)
 
 ############## 需要设置 ##############################
 
-#for (plan in c('D-XJS', 'D+XJS', 'T-XJS', 'T+XJS')){
-for (plan in c('D-XJS', 'T-XJS')){
-  if (plan == 'D-XJS'){
+#for (modelname in c('OLS_DJS_sxq', 'OLS_DJS_qs', 'OLS_XJS_sxq', 'OLS_XJS_qs')){
+for (modelname in c('OLS_DJS_sxq')){
+  if (modelname == 'OLS_DJS_sxq'){
     rangeStatList = c('市辖区', 'Districts', 'BetaD/', 'FigD/')
     WithoutXJS = TRUE
-  } else if(plan == 'D+XJS'){
+	
+  } else if(modelname == 'OLS_XJS_sxq'){
     rangeStatList = c('市辖区', 'Districts', 'BetaD/', 'FigD/')
     WithoutXJS = FALSE
-  } else if(plan == 'T-XJS'){
+	
+  } else if(modelname == 'OLS_DJS_qs'){
     rangeStatList = c('全市', 'Total', 'BetaT/', 'FigT/')
     WithoutXJS = TRUE
-  } else if(plan == 'T+XJS'){
+	
+  } else if(modelname == 'OLS_XJS_qs'){
     rangeStatList = c('全市', 'Total', 'BetaT/', 'FigT/')
     WithoutXJS = FALSE
   }
-  
   
   print(c(rangeStatList,WithoutXJS))
   
+  dir.create(paste0("C:/Sync/CoolGirl/Fhe/Results/",modelname,"/"),showWarnings = F)
+  setwd(paste0("C:/Sync/CoolGirl/Fhe/Results/",modelname,"/"))
+  file.remove(dir())
+  
+  dir.create(paste0("C:/Sync/CoolGirl/Fhe/Results/",modelname,"/",rangeStatList[2]),showWarnings = F)
+  setwd(paste0("C:/Sync/CoolGirl/Fhe/Results/",modelname,"/",rangeStatList[2]))
+  file.remove(dir())
+  
+  dir.create(paste0("C:/Sync/CoolGirl/Fhe/Results/",modelname,"/",rangeStatList[3]),showWarnings = F)
+  setwd(paste0("C:/Sync/CoolGirl/Fhe/Results/",modelname,"/",rangeStatList[3]))
+  file.remove(dir())
+
+  dir.create(paste0("C:/Sync/CoolGirl/Fhe/Results/",modelname,"/",rangeStatList[4]),showWarnings = F)
+  setwd(paste0("C:/Sync/CoolGirl/Fhe/Results/",modelname,"/",rangeStatList[4]))
+  file.remove(dir())
+  
   #####################################################
   
-  #home = '/home/zheyi'
-  home = 'C:/Sync/CoolGirl/Fhe'
-  setwd(paste0(home,'/ecosocialData/SuperIndex'))
-  for (rdat in dir()){load(rdat)}
-  
-  dflist0 = gsub('.Rdata', '', dir(paste0(home,'/ecosocialData/SuperIndex'))) #全部都需要预处理
-  #dflist = grep('POP|\\d', dflist0, invert=T, value=T) #用来算OLS的
-  dflist = dflist0[!dflist0 %in% c('POP','Employee1st','Employee2nd','Employee3rd')]
-  
-  for (yi in 1:length(dflist0)){
-    dfname = dflist0[yi]
-    df = get(dfname)
-    df$year = as.integer(df$year)
-    df$value = as.numeric(df$value)
-    df$value[which(df$value==0)] = NA
-    assign(dfname, df)
-    #eval(parse(text = paste0('return(',dfname, ')')))
-  }
-  
-  
-  if (WithoutXJS){
-    modelname = 'OLS1_DJS'
-    citylist = read.csv(file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/city_info.csv',stringsAsFactors=F)
-    citypre = subset(citylist, citylist$Administrative_level != 'county')$City_ch
-    citycoun = subset(citylist, citylist$Administrative_level == 'county')$City_ch
-    cityqu = read.csv(file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/ToDistrict.csv',stringsAsFactors=F)[,1]
-    mass = c('内蒙市', '胡南省')
-    for (yi in 1:length(dflist0)){
-      dfname = dflist0[yi]
-      df = get(dfname)
-      citydf = unique(df$city)
-      citydel = citydf[!citydf %in% citypre & citydf %in% c(citycoun,cityqu,mass)]
-      df = subset(df, !df$city %in% citydel)
-      
-      assign(dfname, df)
-      #eval(parse(text = paste0('return(',dfname, ')')))
-      print(yi)
-    }
-  } else {modelname = 'OLS2_XJS'}
-  
-  
-  
-  yearrange = 1985:2018
   
   
   ############## OLS
@@ -135,6 +136,7 @@ for (plan in c('D-XJS', 'T-XJS')){
     BetaUpper = vector()
     Rsquare = vector()
     Observation = vector()
+	ObservationAll = vector()
     InterceptLower = vector()
     InterceptUpper = vector()
     for (yi in 1:length(dflist)){
@@ -144,36 +146,37 @@ for (plan in c('D-XJS', 'T-XJS')){
       rangeStat = rangeStatList[1] #按照指标对应的区域更改
       year = yeari
       xdf = get(xdfname)
+	  delcity = '三沙市'
+	  #delcity = c('昌都市','拉萨市','林芝市','日喀则市','山南市','那曲市','三沙市','海东市','儋州市','哈密市','吐鲁番市')
+	  xdf = xdf[which(!(xdf$city %in% delcity)),]
+
 	  
 	  ### 操作有没有县级市
-	  if (WithoutXJS){xdf = xdf[!grepl('县级',xdf$admin),]}
-	  
+	  if (WithoutXJS){
+		xdf = xdf[!grepl('县级',xdf$admin),]
+		adminy = yeari
+		adminyi = subset(adminchange, adminchange$yeari==adminy & !grepl('县级',adminchange$admin))
+	  } else {
+		adminy = yeari
+		adminyi = subset(adminchange, adminchange$yeari==adminy)
+	  }
       ydf = get(ydfname)
 	  
 	  ### 操作有没有市辖区，并找到对应POP年份的Y指标数值
       ORII = xdf[grepl(rangeStat, xdf$index) & xdf$year==year,]
       CORR = ydf[grepl(rangeStat, ydf$index) & ydf$year==year,]
       cordf = SearchCorValue(ORII, CORR)
-	  
-	  
-	  a = unique(ORII$city)
-	  b = adminchange[!grepl('县级',adminchange$admin)&adminchange$yeari==1985,'cityshi']
-	  x = xdf[xdf$city=='天水市',]
-	  
-	  
-	  
-	  
-	  
-	  
+  
 	  ### 
-      if (sum(is.na(cordf))>=dim(cordf)[1] | dim(na.omit(cordf))[1]<130){
+      if (sum(is.na(cordf))>=dim(cordf)[1] | nrow(na.omit(cordf)) < (1/3 * nrow(ORII))){
         Beta[yi] = NA
         Intercept[yi] = NA
         Pvalue[yi]=NA
         BetaLower[yi]=NA
         BetaUpper[yi]=NA
         Rsquare[yi]=NA
-        Observation[yi]=NA
+        Observation[yi]=nrow(na.omit(cordf))
+		ObservationAll[yi]=nrow(adminyi)
         InterceptLower[yi]=NA
         InterceptUpper[yi]=NA
       }else{
@@ -186,7 +189,8 @@ for (plan in c('D-XJS', 'T-XJS')){
         Pvalue[yi] = summary(flm)$coefficients[2,4]
         Rsquare[yi] = summary(flm)$r.squared
         Intercept[yi] = summary(flm)$coefficients[1,1]
-        Observation[yi] = summary(flm)$df[2] + 2
+        Observation[yi] = nrow(na.omit(cordf))
+		ObservationAll[yi] = nrow(adminyi)
         confident = confint(flm, level=0.95)
         if (dim(confident)[1]!=2){
           BetaLower[yi]=NA
@@ -214,23 +218,33 @@ for (plan in c('D-XJS', 'T-XJS')){
         print(g)
         dev.off()}
     }
-    sumlm = data.frame(yIndex=dflist, Beta=Beta, Intercept=Intercept, Pvalue=Pvalue, BetaLower=BetaLower, BetaUpper=BetaUpper, InterceptLower=InterceptLower, InterceptUpper=InterceptUpper, Rsquare=Rsquare, Observation=Observation, year=yeari)
+    sumlm = data.frame(yIndex=dflist, Beta=Beta, Intercept=Intercept, Pvalue=Pvalue, 
+					   BetaLower=BetaLower, BetaUpper=BetaUpper, 
+					   InterceptLower=InterceptLower, InterceptUpper=InterceptUpper, 
+					   Rsquare=Rsquare,
+					   Observation=Observation,
+					   ObservationAll=ObservationAll,
+					   year=yeari)
     sumlmHorizontal = rbind(sumlmHorizontal, sumlm)
   }
   save(sumlmHorizontal, file=paste(home,'/Results/',modelname,'/sumlmHorizontal_',rangeStatList[2],'.Rdata',sep=''))
   write.csv(sumlmHorizontal, file=paste(home,'/Results/', modelname,'/sumlmHorizontal_',rangeStatList[2],'.csv',sep=''))
   
+  
   ##################################
   load(file=paste(home,'/Results/',modelname,'/sumlmHorizontal_',rangeStatList[2],'.Rdata',sep=''))
-  if (WithoutXJS) {
-    sumlmHorizontal[which(sumlmHorizontal$Observation<=200),c('Beta','Intercept','Rsquare')] = NA
-    save(sumlmHorizontal, file=paste(home,'/Results/',modelname,'/200_sumlmHorizontal_',rangeStatList[2],'.Rdata',sep=''))
-    write.csv(sumlmHorizontal, file=paste(home,'/Results/', modelname,'/200_sumlmHorizontal_',rangeStatList[2],'.csv',sep=''))
-  } else {
-    sumlmHorizontal[which(sumlmHorizontal$Observation<=500),c('Beta','Intercept','Rsquare')] = NA
-    save(sumlmHorizontal, file=paste(home,'/Results/',modelname,'/500_sumlmHorizontal_',rangeStatList[2],'.Rdata',sep=''))
-    write.csv(sumlmHorizontal, file=paste(home,'/Results/', modelname,'/500_sumlmHorizontal_',rangeStatList[2],'.csv',sep=''))
-  }
+  # if (WithoutXJS) {
+    # sumlmHorizontal[which(sumlmHorizontal$Observation<=200),c('Beta','Intercept','Rsquare')] = NA
+    # save(sumlmHorizontal, file=paste(home,'/Results/',modelname,'/200_sumlmHorizontal_',rangeStatList[2],'.Rdata',sep=''))
+    # write.csv(sumlmHorizontal, file=paste(home,'/Results/', modelname,'/200_sumlmHorizontal_',rangeStatList[2],'.csv',sep=''))
+  # } else {
+    # sumlmHorizontal[which(sumlmHorizontal$Observation<=500),c('Beta','Intercept','Rsquare')] = NA
+    # save(sumlmHorizontal, file=paste(home,'/Results/',modelname,'/500_sumlmHorizontal_',rangeStatList[2],'.Rdata',sep=''))
+    # write.csv(sumlmHorizontal, file=paste(home,'/Results/', modelname,'/500_sumlmHorizontal_',rangeStatList[2],'.csv',sep=''))
+  # }
+  sumlmHorizontal[which(sumlmHorizontal$Observation<=(2/3*sumlmHorizontal$ObservationAll)),c('Beta','Intercept','Rsquare')] = NA
+  save(sumlmHorizontal, file=paste(home,'/Results/',modelname,'/2-3_sumlmHorizontal_',rangeStatList[2],'.Rdata',sep=''))
+  write.csv(sumlmHorizontal, file=paste(home,'/Results/', modelname,'/2-3_sumlmHorizontal_',rangeStatList[2],'.csv',sep=''))
   
   # ############################### temporal dynamics of intercept
   # rangeStatList[3] = 'InterceptD/'
@@ -243,17 +257,17 @@ for (plan in c('D-XJS', 'T-XJS')){
   #     geom_point(size = 2.2, colour='#FF6600') +
   #     geom_errorbar(aes(ymin=InterceptLower, ymax=InterceptUpper), width=.1, colour='#FF6600') +
   #     #geom_hline(yintercept = c(7/6,1,5/6),alpha=0.4) +
-  #     labs(x = 'Year(1984-2016)', y='Intercept', title=paste0(gsub(rangeStat, '', yname),'.',rangeStatList[2])) +
+  #     labs(x = 'Year(1984-2017)', y='Intercept', title=paste0(gsub(rangeStat, '', yname),'.',rangeStatList[2])) +
   #     theme(text = element_text(size=18))
   #   print(p)
   #   dev.off()
   # }
   # 
-  # ylists = c('Book','Bus','BusPassenger','Crash','Deposit','DepositHousehold','Fire','FixedAssets','Employee','Loan','Passenger','PostTele','Retail','Salary','WasteWater')
+  # ylists = c('Book','Bus','BusPassenger','Crash','Deposit','DepositHousehold','Fire','FixedAssets','GDP','Loan','Passenger','PostTele','Retail','Salary','WasteWater')
   # ylisti = c('Cinema', 'CityRoadArea','Doctor','Gas.Length','Green','GreenBuilt','Hospital','HospitalBerth','School','PavedRoad.Length','PrimarySchool','PrimaryTeacher','School','Sewage.Length','WaterSupply.Length')
   # yliste = c('Electricity','ElectricityResident','Water','LivingSpace','Water','WaterResident')
   # ylista = c('Area', 'AreaBuilt')
-  # #ylists = c('Employee', 'Salary', 'DepositHousehold') #'Book', 'PostTele'
+  # #ylists = c('GDP', 'Salary', 'DepositHousehold') #'Book', 'PostTele'
   # #ylisti = c('CityRoadArea','Hospital')  #'HospitalBerth'
   # #yliste = c('Electricity', 'Water')
   # #ylista = c('Area', 'AreaBuilt')
@@ -268,7 +282,7 @@ for (plan in c('D-XJS', 'T-XJS')){
   #     geom_line(size=1) + geom_point(size=2) +
   #     geom_errorbar(aes(ymin=InterceptLower, ymax=InterceptUpper), width=.2, alpha=0.4) +
   #     #geom_hline(yintercept = c(7/6,1,5/6),alpha=0.7,size=1,color='darkorange') +
-  #     labs(x = 'Year(1984-2016)', y='Intercept') +
+  #     labs(x = 'Year(1984-2017)', y='Intercept') +
   #     theme(
   #       text = element_text(size=18),
   #       panel.background = element_rect(fill = "transparent",colour = 'black'), 
@@ -286,3 +300,6 @@ for (plan in c('D-XJS', 'T-XJS')){
   
   
 }
+
+e=Sys.time()
+e-s

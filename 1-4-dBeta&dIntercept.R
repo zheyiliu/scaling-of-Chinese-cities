@@ -8,24 +8,81 @@
 # abline(v=0)
 # abline(h=0)
 
-library(ggplot2)
-home = 'C:/Sync/CoolGirl/Fhe'
-modelname='OLS1_DJS_orgin'
-#setwd(paste0(home, '/Results/',modelname))
-rangeStatList = c('市辖区', 'Districts', 'BetaD/')
-setwd('C:/Sync/CoolGirl/Fhe/Results/OLS1_DJS_origin/fromPC/DJS')
-load(paste0('sumlmHorizontal_',rangeStatList[2],'.Rdata'))
-setwd(paste0(home, '/Results/',modelname))
 
-sumlmHorizontal = sumlmHorizontal[which(sumlmHorizontal$Observation>=200),]
-del = sumlmHorizontal$yIndex=='FixedAssets'
-sumlmHorizontal = sumlmHorizontal[!del,]
-#del = sumlmHorizontal$yIndex=='GDP' & sumlmHorizontal$year < 1991
+library(ggplot2)
+
+
+home = 'C:/Sync/CoolGirl/Fhe'
+modelname='OLS_DJS_sxq'
+setwd(paste0(home, '/Results/',modelname))
+rangeStatList = c('市辖区', 'Districts', 'BetaD/')
+#setwd('C:/Sync/CoolGirl/Fhe/Results/OLS1_DJS/fromPC/DJS')
+#load(paste0('200_sumlmHorizontal_',rangeStatList[2],'.Rdata'))
+load(paste0('sumlmHorizontal_Districts_cluster.Rdata'))
+
+
+dir.create(paste0("C:/Sync/CoolGirl/Fhe/Results/",modelname,"/dbetadintercept/"),showWarnings = F)
+setwd(paste0("C:/Sync/CoolGirl/Fhe/Results/",modelname,"/dbetadintercept"))
+file.remove(dir())
+
+#load(paste0('sumlmHorizontal_',rangeStatList[2],'.Rdata'))
+#del = sumlmHorizontal$yIndex %in% c('FixedAssets')
 #sumlmHorizontal = sumlmHorizontal[!del,]
 
-#yearrange = c(1986,1996,2006,2016)
-yearrange = 1984:2016
-forclus = sumlmHorizontal[,c('yIndex','Beta','Intercept','year')]
+# load('x3best.Rdata')
+# 
+# methodimp = 'norm'
+# forclus = sumlmHorizontal[,c('yIndex','Intercept', 'year')]
+# head(forclus)
+# x1 = split(forclus, f=forclus$yIndex)
+# x0 = x1[[1]][,c(2,3)]
+# for (i in 2:length(x1)){
+#   x0 = merge(x0, x1[[i]][,c(2,3)], by='year',all=T)  
+# }
+# colnames(x0) = c('year',names(x1) )
+# tt = apply(is.na.data.frame(x0), 2, sum)
+# x0 = x0[,c(names(tt[tt<20]))]
+# 
+# png(filename=paste0(home, '/Results/',modelname,'/clustering/imputation.png'),
+#     width=15,height=15, units='cm',res=150)
+# md.pattern(x0,rotate.name=T)
+# dev.off()
+# #fit = with(x0, lm(Sewage.Length~year))
+# #summary(fit)
+# 
+# ini <- mice(x0, pred=quickpred(x0, mincor=.9), print=F)
+# set.seed(777)
+# imp <- mice(x0, pred=ini$pred, print=F, method=methodimp)
+# #imp40 <- mice.mids(imp, print=F, maxit=35)
+# #plot(imp40)
+# 
+# #fit = with(imp, lm(Sewage.Length~year))
+# fit = with(imp, lm(Loan~year))
+# summary(fit)
+# pooled = pool(fit)
+# summary(pooled)
+# 
+# x4 = complete(imp,action=3)
+# stripplot(imp, Sewage.Length~.imp, pch=20, cex=2)
+# plot(x0$year, x0$Sewage.Length)
+# points(x4$year,x4$Sewage.Length,col=2)
+# save(x4,file='x4best.Rdata')
+# 
+# 
+# newyindex = rep(colnames(x3)[-1],each=nrow(x3))
+# newBeta = unlist(c(x3[,c(2:ncol(x3))]))
+# newIntercept = unlist(c(x4[,c(2:ncol(x3))]))
+# newyear = rep(x3$year,ncol(x3)-1)
+# newsum = data.frame(yIndex=newyindex, Beta=newBeta, Intercept=newIntercept, year=newyear)
+
+########################
+############ 4 years
+#######################
+
+yearrange = 1984:2017
+forclus = na.omit(sumlmHorizontal[,c('yIndex','Beta','Intercept','year')])
+#forclus = newsum
+for1 = unique(sumlmHorizontal[,c('yIndex','type','clusMember')])
 forclus$year = forclus$year - 1
 forclus = forclus[forclus$year %in% yearrange,]
 
@@ -33,10 +90,20 @@ forclus$stage = NA
 forclus[forclus$year %in% 1984:1991,]$stage = 1
 forclus[forclus$year %in% 1992:1998,]$stage = 2
 forclus[forclus$year %in% 1999:2004,]$stage = 3
-forclus[forclus$year %in% 2005:2016,]$stage = 4
+forclus[forclus$year %in% 2005:2017,]$stage = 4
+
+# forclus$stage = NA
+# forclus[forclus$year %in% 1984:1987,]$stage = 0
+# forclus[forclus$year %in% 1991:1994,]$stage = 1
+# forclus[forclus$year %in% 2002:2005,]$stage = 2
+# forclus[forclus$year %in% 2007:2010,]$stage = 3
+# forclus[forclus$year %in% 2013:2017,]$stage = 4
+
 stagenum = unique(forclus$stage)
 forclus$indexstage = paste(forclus$yIndex,forclus$stage)
-#forclus = aggregate(forclus[,c('Beta','Intercept')], by=list(yIndex=forclus$yIndex,stage=forclus$stage), mean)
+# forclus1 = aggregate(forclus[,c('Beta','Intercept')], by=list(yIndex=forclus$yIndex,stage=forclus$stage), mean)
+# for1 = unique(forclus[,c(1,5,6)])
+# forclus = merge(forclus1, for1, by.x='yIndex', by.y='yIndex')
 
 
 ######## year
@@ -55,91 +122,80 @@ for (i in 1:length(x1)){
   xall = rbind(xall, diffbeta)
 }
 
+xall = merge(xall, for1, by.x='yIndex', by.y='yIndex', all.x=T)
+xall = na.omit(xall)
 
-
-#### 1031
-#### up
-# col = c("#619CFF", "#00BA38", "grey52", "#F8766D")
-# economoicdf = c('DepositHousehold','Electricity','GDP','Loan','PostTele','Retail','Salary','WasteWater','Cinema','Water')
-# infrasdf = c('CityRoadArea','Sewage.Length','GreenBuilt')
-# needdf = c('Doctor','HospitalBerth') #,'Doctor'
-# areadf = c('AreaBuilt')
-
-#### all
-# col = c("#619CFF", "#00BA38", "grey52", "#F8766D")
-# economoicdf = c('DepositHousehold','Electricity','GDP','Loan','PostTele','Retail','Salary','WasteWater','Cinema','Water')
-# infrasdf = c('CityRoadArea','Sewage.Length','GreenBuilt')
-# needdf = c('Doctor','HospitalBerth','LivingSpace','Hospital','School','PrimarySchool','PrimaryTeacher') #,'Doctor'
-# areadf = c('AreaBuilt','Area')
-
-#### 1032
-##### up
-col = c("#619CFF", "#00BA38", "grey52", "#F8766D")
-economoicdf = c('Book','DepositHousehold','Electricity','GDP','Loan','PostTele','Retail','Salary','WasteWater','Water','Cinema','Bus')
-infrasdf = c('CityRoadArea','Sewage.Length','GreenBuilt')
-needdf = c('Doctor','HospitalBerth')
-areadf = c('AreaBuilt')
-
-#### down
-col = c("#619CFF", "grey52")
-needdf = c('LivingSpace','Hospital','PrimarySchool','PrimaryTeacher')
-areadf = c('Area')
-
-# ##### all
-# col = c("#619CFF", "#00BA38", "grey52", "#F8766D")
-# economoicdf = c('Book','DepositHousehold','Electricity','GDP','Loan','PostTele','Retail','Salary','WasteWater','Water','Cinema','Bus')
-# infrasdf = c('CityRoadArea','Sewage.Length','GreenBuilt')
-# needdf = c('Doctor','HospitalBerth','LivingSpace','Hospital','School','PrimarySchool','PrimaryTeacher')
-# areadf = c('AreaBuilt', 'AreaBuilt')
-
+############################
 #' economoicdf = c('Book','DepositHousehold','GDP','Loan','Retail','Salary')
 #' #'Passenger', 'BusPassenger', 'Cinema', 'PostTele', 'Crash','Fire','Deposit','FixedAssets','Electricity','Water','WasteWater'
 #' infrasdf = c('CityRoadArea','Green')
 #' #'Gas.Length','PavedRoad.Length','WaterSupply.Length','Bus','Sewage.Length'
-#' needdf = c('Doctor','HospitalBerth')
+#' needdf = c('Doctor','Hospital','HospitalBerth','PrimarySchool','PrimaryTeacher')
 #' #'ElectricityResident','WaterResident','School','LivingSpace'
-#' areadf = c('AreaBuilt')
-
-xall$type=NA
-xall[xall$yIndex %in% economoicdf,]$type = 'Socio-economic'
-xall[xall$yIndex %in% infrasdf,]$type = 'Infrastructure'
-xall[xall$yIndex %in% needdf,]$type = 'Basic Services'
-xall[xall$yIndex %in% areadf,]$type = 'Land Use'
-xall = xall[!is.na(xall$type),]
-
+#' areadf = c('Area', 'AreaBuilt')
+#' 
+############################
+# col = c("#619CFF", "grey52", "#00BA38", "#F8766D")
+# economoicdf = c('Book','DepositHousehold','Electricity','FixedAssets','GDP','Loan','PostTele','Retail','Salary','WasteWater','Water','Bus','Cinema')
+# infrasdf = c('CityRoadArea','Green','Sewage.Length')
+# needdf = c('ElectricityResident','WaterResident','Doctor','HospitalBerth')
+# areadf = c('AreaBuilt')
+# 
 # xall$type=NA
-# xall[xall$yIndex %in% economoicdf,]$type = 'socio-economic'
-# xall[xall$yIndex %in% infrasdf,]$type = 'infrastructure'
-# xall[xall$yIndex %in% needdf,]$type = 'individual need'
-# xall[xall$yIndex %in% areadf,]$type = 'Area'
+# xall[xall$yIndex %in% economoicdf,]$type = 'Socio-economic'
+# xall[xall$yIndex %in% infrasdf,]$type = 'Infrastructure'
+# xall[xall$yIndex %in% needdf,]$type = 'Basic Services'
+# xall[xall$yIndex %in% areadf,]$type = 'Land Use'
 # xall = xall[!is.na(xall$type),]
 # 
 # xall$color=NA
 # xall[xall$yIndex %in% economoicdf,]$color = "#F8766D"
 # xall[xall$yIndex %in% infrasdf,]$color = "#00BA38"
-# xall[xall$yIndex %in% needdf,]$color = "grey52"
-# xall[xall$yIndex %in% areadf,]$color = "#619CFF"
+# xall[xall$yIndex %in% needdf,]$color = "#619CFF"
+# xall[xall$yIndex %in% areadf,]$color = "grey52"
 # xall = xall[!is.na(xall$color),]
+# 
+# xall = na.omit(xall)
 
-xall = na.omit(xall)
-
-xall0 = xall
-xall = xall0
-#xall = xall[!xall$year %in% c(1993,1994),]
-
-a = aggregate(xall, list(xall$year), mean)
-outa = table(xall$year)
-out = names(outa[outa < (1/2 * length(unique(xall$yIndex)))])
-a = a[!a$year %in% out,]
-
+###############################
 xall$color=NA
-xall[xall$yIndex %in% economoicdf,]$color = "#F8766D"
-xall[xall$yIndex %in% infrasdf,]$color = "#00BA38"
-xall[xall$yIndex %in% needdf,]$color = "#619CFF"
-xall[xall$yIndex %in% areadf,]$color = "grey52"
+xall[xall$type == 'Socio-economic',]$color = "#F8766D"
+xall[xall$type == 'Infrastructure',]$color = "#00BA38"
+xall[xall$type == 'Basic Services',]$color = "#619CFF"
+xall[xall$type == 'Land Use',]$color = "grey52"
 xall = xall[!is.na(xall$color),]
 
-#col = "grey52"
+###################################
+
+xall$typeclus = paste(xall$type,xall$clusMember)
+
+#xall = xall[xall$year!=1994,]
+xall0 = xall
+xall = xall0
+
+alltype = split(xall, f=as.factor(xall$clusMember))
+xall = alltype[[2]]
+a = aggregate(xall, list(xall$year), mean)
+
+
+# png(filename=paste0(home, '/Results/',modelname,'/dbetadintercept/4stages1.png'),
+#     width=24.5,height=9, units='cm',res=180)
+# par(mfrow=c(1,3),oma=c(0,0,0,0),mar=c(5,3.3,1,1)+0.1,mgp=c(2.3,1,0))
+# plot(xall$year, xall$Beta,xlab='Year',ylab='Δβ',cex.axis=1,cex.lab=1.5,cex=1.5,col=xall$color,pch=20)
+# points(a$year,a$Beta,col=1,pch=20,cex=2)
+# abline(h=0)
+# abline(v=c(1992.5, 1998.5, 2004.5),lty=2)
+# plot(xall$year, xall$Intercept,xlab='Year',ylab='Δα',cex.axis=1,cex.lab=1.5,cex=1.5,col=xall$color,pch=20)
+# points(a$year,a$Intercept,col=1,pch=20,cex=2)
+# abline(h=0)
+# abline(v=c(1992.5,1998.5, 2004.5),lty=2)
+# plot(a$Beta, a$Intercept,xlab='Δβ',ylab='Δα',col=a$stage,cex.axis=1,cex.lab=1.5,cex=1.3,pch=19,xlim=c(-0.05,0.05), ylim=c(min(a$Intercept)-0.05, max(a$Intercept)+0.05))
+# abline(h=0)
+# abline(v=0)
+# dev.off()
+
+#col = c("#619CFF", "#00BA38", "grey52", "#F8766D")
+col = c("#00BA38", "grey52", "#F8766D")
 ##### beta阶段图
 png(filename=paste0(home, '/Results/',modelname,'/dbetadintercept/4stages1.png'),
     width=15,height=15, units='cm',res=180)
@@ -224,6 +280,8 @@ abline(h=0)
 abline(v=0)
 dev.off()
 
+  
+
 ##### 线性-全部
 png(filename=paste0(home, '/Results/',modelname,'/dbetadintercept/linearCheck.png'),
     width=18,height=14.5, units='cm',res=100)
@@ -242,9 +300,7 @@ ayear = substr(a$Group.1, 1,4)
 atype = substr(a$Group.1, 5,nchar(a$Group.1))
 a$type = atype
 
-outa = table(xall$year)
-out = names(outa[outa < (1/2 * length(unique(xall$yIndex)))])
-a = a[!a$year %in% out,]
+#a = a[!a$year %in% c(1994),]
 
 png(filename=paste0(home, '/Results/',modelname,'/dbetadintercept/4stagesTypeIntercept.png'),
     width=17,height=17, units='cm',res=180)
@@ -320,65 +376,13 @@ p = ggplot(data=a, aes(x=Beta, y=Intercept, color=stage, cex=2)) +
 print(p)
 dev.off()
 
-# 
-# #########################################################
-# ########### 4 stages
-# ####################
-# yearrange = 1985:2017
-# forclus = sumlmHorizontal[,c('yIndex','Beta','Intercept','year')]
-# forclus$year = forclus$year - 1
-# #liudong = read.csv('C:/Sync/CoolGirl/Fhe/ecosocialData/原始数据/POPmobility.csv',header=T)[,c(1,3)]
-# #forlm = merge(forclus, liudong, all=T)
-# #x2 = split(forlm, f=forlm$yIndex)
-# #f = lm(x2$GDP$Beta~x2$GDP$FloatingPOP)
-# #summary(f)
-# 
-# forclus$year = forclus$year - 1
-# forclus$stage = NA
-# forclus[forclus$year %in% 1984:1991,]$stage = 1
-# forclus[forclus$year %in% 1992:1998,]$stage = 2
-# forclus[forclus$year %in% 1999:2004,]$stage = 3
-# forclus[forclus$year %in% 2005:2016,]$stage = 4
-# stagenum = unique(forclus$stage)
-# forclus$indexstage = paste(forclus$yIndex,forclus$stage)
-# forclus = aggregate(forclus[,c('Beta','Intercept')], by=list(yIndex=forclus$yIndex,stage=forclus$stage), mean)
-# 
-# 
-# x2 = split(forclus, f=forclus$yIndex)
-# stagecom = data.frame(stage=1:length(stagenum))
-# x1 = lapply(x2, FUN = function(x){merge(stagecom, x, by='stage', all=T)})
-# 
-# xall = data.frame()
-# for (i in 1:length(x1)){
-#   x0 = x1[[i]]
-#   diffbeta = data.frame(x0[-1,])
-#   for(n in c(3,4)){
-#     diffbeta[,n] = diff(x0[,n])
-#   }
-#   xall = rbind(xall, diffbeta)
-# }
-# 
-# # col = c("#619CFF", "grey52", "#00BA38", "#F8766D")
-# # economoicdf = c('Book','DepositHousehold','Electricity','FixedAssets','GDP','Loan','PostTele','Retail','Salary','WasteWater','Water')
-# # infrasdf = c('Cinema', 'CityRoadArea','Doctor','Gas.Length','Green','GreenBuilt','Hospital','HospitalBerth','School','PavedRoad.Length','PrimarySchool','PrimaryTeacher','Sewage.Length','WaterSupply.Length')
-# # needdf = c('ElectricityResident','LivingSpace','WaterResident')
-# # areadf = c('Area', 'AreaBuilt')
-# 
-# col = c("#619CFF", "grey52", "#00BA38", "#F8766D")
-# economoicdf = c('Book','DepositHousehold','Electricity','FixedAssets','GDP','Loan','PostTele','Retail','Salary','WasteWater','Water','Cinema')
-# infrasdf = c('CityRoadArea','Green','Sewage.Length')
-# needdf = c('ElectricityResident','WaterResident','Doctor','HospitalBerth')
-# areadf = c('AreaBuilt')
-# 
-# xall$type=NA
-# xall[xall$yIndex %in% economoicdf,]$type = 'Socioeconomics'
-# xall[xall$yIndex %in% infrasdf,]$type = 'Infrastructure'
-# xall[xall$yIndex %in% needdf,]$type = 'Basic individual service'
-# xall[xall$yIndex %in% areadf,]$type = 'Area'
-# xall = xall[!is.na(xall$type),]
-# 
+
+
+
+
+# ####### 分类-四分图
 # xall$stage = as.factor(xall$stage)
-# p = ggplot(data=xall, aes(x=Beta, y=Intercept, color=stage,cex=2)) + 
+# p = ggplot(data=xall, aes(x=Beta, y=Intercept, color=stage,cex=2)) +
 #   #scale_colour_manual(values = alpha(col,1)) +
 #   #geom_point() +
 #   #geom_text(aes(label=paste0(substr(as.character(yIndex),1,3),stage), color=type), cex=3) +
@@ -391,8 +395,8 @@ dev.off()
 #   labs(x ='dBeta', y='dIntercept') +
 #   theme(
 #     text = element_text(size=18),
-#     panel.background = element_rect(fill = "transparent",colour = 'black'), 
-#     panel.grid.minor = element_line(color=NA), 
+#     panel.background = element_rect(fill = "transparent",colour = 'black'),
+#     panel.grid.minor = element_line(color=NA),
 #     panel.grid.major = element_line(color=NA),
 #     plot.background = element_rect(fill = "transparent",colour = NA),
 #     legend.position="none"
@@ -401,79 +405,7 @@ dev.off()
 
 
 
-#############################
-#############################
-# yearrange = 1985:2017
-# forclus = sumlmHorizontal[,c('yIndex','Beta','Intercept','year')]
-# 
-# forclus$year = forclus$year - 1
-# forclus$stage = NA
-# forclus[forclus$year %in% 1984:1987,]$stage = 0
-# forclus[forclus$year %in% 1991:1994,]$stage = 1
-# forclus[forclus$year %in% 2002:2005,]$stage = 2
-# forclus[forclus$year %in% 2007:2010,]$stage = 3
-# forclus[forclus$year %in% 2013:2016,]$stage = 4
-# stagenum = unique(forclus$stage)
-# forclus$indexstage = paste(forclus$yIndex,forclus$stage)
-# forclus = aggregate(forclus[,c('Beta','Intercept')], by=list(yIndex=forclus$yIndex,stage=forclus$stage), mean)
-# 
-# x2 = split(forclus, f=forclus$yIndex)
-# stagecom = data.frame(stage=1:length(stagenum))
-# x1 = lapply(x2, FUN = function(x){merge(stagecom, x, by='stage', all=T)})
-# 
-# xall = data.frame()
-# for (i in 1:length(x1)){
-#   x0 = x1[[i]]
-#   diffbeta = data.frame(x0[-1,])
-#   for(n in c(3,4)){
-#     diffbeta[,n] = diff(x0[,n])
-#   }
-#   xall = rbind(xall, diffbeta)
-# }
-# 
-# col = c("#619CFF", "grey52", "#00BA38", "#F8766D")
-# economoicdf = c('Book','DepositHousehold','Electricity','FixedAssets','GDP','Loan','PostTele','Retail','Salary','WasteWater','Water')
-# infrasdf = c('Cinema', 'CityRoadArea','Doctor','Gas.Length','Green','GreenBuilt','Hospital','HospitalBerth','School','PavedRoad.Length','PrimarySchool','PrimaryTeacher','Sewage.Length','WaterSupply.Length')
-# needdf = c('ElectricityResident','LivingSpace','WaterResident')
-# areadf = c('Area', 'AreaBuilt')
-# 
-# 
-# col = c("#619CFF", "grey52", "#00BA38", "#F8766D")
-# economoicdf = c('Book','DepositHousehold','Electricity','FixedAssets','GDP','Loan','PostTele','Retail','Salary','WasteWater','Water')
-# infrasdf = c('Cinema', 'CityRoadArea','Doctor','Green','HospitalBerth','Sewage.Length')
-# needdf = c('ElectricityResident','WaterResident')
-# areadf = c('AreaBuilt')
-# 
-# xall$type=NA
-# xall[xall$yIndex %in% economoicdf,]$type = 'Socioeconomics'
-# xall[xall$yIndex %in% infrasdf,]$type = 'Infrastructure'
-# xall[xall$yIndex %in% needdf,]$type = 'Basic individual service'
-# xall[xall$yIndex %in% areadf,]$type = 'Area'
-# xall = xall[!is.na(xall$type),]
-# 
-# xall$stage = as.factor(xall$stage)
-# p = ggplot(data=xall, aes(x=Beta, y=Intercept, color=stage,cex=2)) + 
-#   #scale_colour_manual(values = alpha(col,1)) +
-#   #geom_point() +
-#   #geom_text(aes(label=paste0(substr(as.character(yIndex),1,3),stage), color=type), cex=3) +
-#   geom_text(aes(label=paste0(yIndex,stage), color=stage), cex=3) +
-#   #geom_text(aes(label=stage, color=stage), cex=5) +
-#   xlim(-0.25,0.25) +
-#   facet_wrap(. ~ type, ncol=2) +
-#   geom_hline(yintercept=0) +
-#   geom_vline(xintercept=0) +
-#   labs(x ='Δβ', y='Δα') +
-#   theme(
-#     text = element_text(size=18),
-#     panel.background = element_rect(fill = "transparent",colour = 'black'), 
-#     panel.grid.minor = element_line(color=NA), 
-#     panel.grid.major = element_line(color=NA),
-#     plot.background = element_rect(fill = "transparent",colour = NA),
-#     legend.position="none"
-#   )
-# print(p)
-
-yearrange = 1984:2016
+yearrange = 1984:2017
 forclus = na.omit(sumlmHorizontal[,c('yIndex','Beta','Intercept','year')])
 #forclus = newsum
 for1 = unique(sumlmHorizontal[,c('yIndex','type','clusMember')])
@@ -484,7 +416,7 @@ forclus$stage = NA
 forclus[forclus$year %in% 1984:1991,]$stage = 1
 forclus[forclus$year %in% 1992:1998,]$stage = 2
 forclus[forclus$year %in% 1999:2004,]$stage = 3
-forclus[forclus$year %in% 2005:2016,]$stage = 4
+forclus[forclus$year %in% 2005:2017,]$stage = 4
 
 stagenum = unique(forclus$stage)
 forclus$indexstage = paste(forclus$yIndex,forclus$stage)
@@ -527,42 +459,11 @@ xall1 = x13 #orgin
 xall = merge(xall, for1, by.x='yIndex', by.y='yIndex', all.x=T)
 xall = na.omit(xall)
 
-#### 1032
-##### up
-col = c("#619CFF", "#00BA38", "grey52", "#F8766D")
-economoicdf = c('Book','DepositHousehold','Electricity','GDP','Loan','PostTele','Retail','Salary','WasteWater','Water','Cinema','Bus')
-infrasdf = c('CityRoadArea','Sewage.Length','GreenBuilt')
-needdf = c('Doctor','HospitalBerth')
-areadf = c('AreaBuilt')
-
-# #### down
-# col = c("#619CFF", "grey52")
-# needdf = c('LivingSpace','Hospital','PrimarySchool','PrimaryTeacher')
-# areadf = c('Area')
-
-xall$type=NA
-xall[xall$yIndex %in% economoicdf,]$type = 'Socio-economic'
-xall[xall$yIndex %in% infrasdf,]$type = 'Infrastructure'
-xall[xall$yIndex %in% needdf,]$type = 'Basic Services'
-xall[xall$yIndex %in% areadf,]$type = 'Land Use'
-xall = xall[!is.na(xall$type),]
-
-xall = na.omit(xall)
-
-xall0 = xall
-xall = xall0
-#xall = xall[!xall$year %in% c(1993,1994),]
-
-a = aggregate(xall, list(xall$year), mean)
-outa = table(xall$year)
-out = names(outa[outa < (1/2 * length(unique(xall$yIndex)))])
-a = a[!a$year %in% out,]
-
 xall$color=NA
-xall[xall$yIndex %in% economoicdf,]$color = "#F8766D"
-xall[xall$yIndex %in% infrasdf,]$color = "#00BA38"
-xall[xall$yIndex %in% needdf,]$color = "#619CFF"
-xall[xall$yIndex %in% areadf,]$color = "grey52"
+xall[xall$type == 'Socio-economic',]$color = "#F8766D"
+xall[xall$type == 'Infrastructure',]$color = "#00BA38"
+xall[xall$type == 'Basic Services',]$color = "#619CFF"
+xall[xall$type == 'Land Use',]$color = "grey52"
 xall = xall[!is.na(xall$color),]
 
 ###################################
