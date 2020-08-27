@@ -76,7 +76,6 @@ SearchCorValue = function(ORI, COR){ #找到某指标对应的另一指标的值
 
 
 ############## OLS
-sumlmHorizontal = data.frame()
 #modelname = 'OLS_R'
 #rangeStatList = c('全市', 'Total','BetaT/')
 modelname = 'OLS_DJS_sxq_R'
@@ -89,17 +88,17 @@ dir.create(paste0("C:/Sync/CoolGirl/Fhe/Results/",modelname,"/"),showWarnings = 
 setwd(paste0("C:/Sync/CoolGirl/Fhe/Results/",modelname,"/"))
 file.remove(dir())
   
-# dir.create(paste0("C:/Sync/CoolGirl/Fhe/Results/",modelname,"/",rangeStatList[2]),showWarnings = F)
-# setwd(paste0("C:/Sync/CoolGirl/Fhe/Results/",modelname,"/",rangeStatList[2]))
-# file.remove(dir())
+dir.create(paste0("C:/Sync/CoolGirl/Fhe/Results/",modelname,"/",rangeStatList[2]),showWarnings = F)
+setwd(paste0("C:/Sync/CoolGirl/Fhe/Results/",modelname,"/",rangeStatList[2]))
+file.remove(dir())
   
-# dir.create(paste0("C:/Sync/CoolGirl/Fhe/Results/",modelname,"/",rangeStatList[3]),showWarnings = F)
-# setwd(paste0("C:/Sync/CoolGirl/Fhe/Results/",modelname,"/",rangeStatList[3]))
-# file.remove(dir())
+dir.create(paste0("C:/Sync/CoolGirl/Fhe/Results/",modelname,"/",rangeStatList[3]),showWarnings = F)
+setwd(paste0("C:/Sync/CoolGirl/Fhe/Results/",modelname,"/",rangeStatList[3]))
+file.remove(dir())
 
-# dir.create(paste0("C:/Sync/CoolGirl/Fhe/Results/",modelname,"/",rangeStatList[4]),showWarnings = F)
-# setwd(paste0("C:/Sync/CoolGirl/Fhe/Results/",modelname,"/",rangeStatList[4]))
-# file.remove(dir())
+dir.create(paste0("C:/Sync/CoolGirl/Fhe/Results/",modelname,"/",rangeStatList[4]),showWarnings = F)
+setwd(paste0("C:/Sync/CoolGirl/Fhe/Results/",modelname,"/",rangeStatList[4]))
+file.remove(dir())
   
   
 
@@ -198,6 +197,6 @@ save(sumlmHorizontal, file=paste(home,'/Results/',modelname,'/sumlmHorizontal_',
 write.csv(sumlmHorizontal, file=paste(home,'/Results/', modelname,'/sumlmHorizontal_',rangeStatList[2],'.csv',sep=''))
 
 #load(file=paste(home,'/Results/',modelname,'/sumlmHorizontal_',rangeStatList[2],'.Rdata',sep=''))
-sumlmHorizontal[which(sumlmHorizontal$Observation<=(2/3*sumlmHorizontal$ObservationAll)),c('Beta','Intercept','Rsquare')] = NA
-save(sumlmHorizontal, file=paste(home,'/Results/',modelname,'/2-3_sumlmHorizontal_',rangeStatList[2],'.Rdata',sep=''))
-write.csv(sumlmHorizontal, file=paste(home,'/Results/', modelname,'/2-3_sumlmHorizontal_',rangeStatList[2],'.csv',sep=''))
+#sumlmHorizontal[which(sumlmHorizontal$Observation<=(2/3*sumlmHorizontal$ObservationAll)),c('Beta','Intercept','Rsquare')] = NA
+#save(sumlmHorizontal, file=paste(home,'/Results/',modelname,'/2-3_sumlmHorizontal_',rangeStatList[2],'.Rdata',sep=''))
+#write.csv(sumlmHorizontal, file=paste(home,'/Results/', modelname,'/2-3_sumlmHorizontal_',rangeStatList[2],'.csv',sep=''))

@@ -1564,6 +1564,7 @@ for (yi in 1:length(dflist0)){
     dfi = get(dfn)
 	dfi = FunTrim(df=dfi, adminchange=adminchange)
     dfiadmin = FunAdmin(df=dfi, adminchange=adminchange)
+	assign(dfn, dfiadmin)
 	eval(parse(text=paste0('save(',dfn,",file='C:/Sync/CoolGirl/Fhe/ecosocialDATA/SuperIndex_origin/",dfn,".Rdata')")))
 }
   

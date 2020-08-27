@@ -224,8 +224,8 @@ for (ylist in list(ylist1, ylist2)){
 ylist1 = names(clusMember[clusMember==1])
 ylist2 = names(clusMember[clusMember==2])
 sumlmHorizontal$ylist = NA
-sumlmHorizontal[sumlmHorizontal$yIndex %in% ylist1,]$ylist = 'b'
-sumlmHorizontal[sumlmHorizontal$yIndex %in% ylist2,]$ylist = 'a'
+sumlmHorizontal[sumlmHorizontal$yIndex %in% ylist1,]$ylist = 'a'
+sumlmHorizontal[sumlmHorizontal$yIndex %in% ylist2,]$ylist = 'b'
 dfBeta = sumlmHorizontal[!is.na(sumlmHorizontal$ylist),]
   dfBeta$yIndex = as.character(dfBeta$yIndex)
   png(filename=paste0(home, '/Results/',modelname,'/clustering/',methodimp,'_P_Clustering_BetaTemporal.png'),

@@ -33,6 +33,12 @@ foo = na.omit(foo)
 a = lm(foo$Beta.x~foo$Beta.y) #x是常住人口，y是户籍人口， x常住人口~y户籍人口
 aa = summary(a)
 
+foo <- within(foo, yIndex <- factor(yIndex, levels = c(economoicdf, needdf, infrasdf, areadf)))
+with(foo, levels(yIndex))
+
+foo <- within(foo, type <- factor(type, levels = c('Socio-economic', 'Basic Services', 'Infrastructure', 'Land Use')))
+with(foo, levels(type))
+
 #text = paste0('y=', round(aa$coefficients[1,1],3), 'x, R^2=', round(aa$r.squared,3))
 text = paste0('y=', round(aa$coefficients[2,1],3), 'x', round(aa$coefficients[1,1],3), ', R^2=', round(aa$r.squared,3))
 
@@ -288,7 +294,7 @@ exp(0.072/1.219515) #2010, 1.0236
 at = t.test(foo$Beta.x, foo$Beta.y, paired=T)
 bt = t.test(foo$Intercept.x,foo$Intercept.y,paired=T,alternative = 'less')
 rt = t.test(foo$Rsquare.x,foo$Rsquare.y,paired=T,alternative = 'greater')
-pt = t.test(cordf1$xindex, cordf1$yindex, paired=T,alternative = 'greater')
+pt = t.test(log(cordf1$xindex), log(cordf1$yindex), paired=T,alternative = 'two.sided')
 
 #at = t.test(foo$Beta.x, foo$Beta.y, paired=T)
 #bt = t.test(foo$Intercept.x,foo$Intercept.y,paired=T)
@@ -298,3 +304,113 @@ at
 bt
 rt
 pt
+
+
+colnames(foo) = gsub('\\bx\\b','Resident',colnames(foo))
+colnames(foo) = gsub('\\by\\b','Registered',colnames(foo))
+
+
+######################################
+# Radar Chart
+
+dfmat = data.frame(
+	yname = c(economoicdf,needdf,infrasdf,areadf),
+	type = c(rep('1economy', length(economoicdf)), rep('2survice', length(needdf)), 
+			 rep('3infras', length(infrasdf)), rep('4landuse', length(areadf))),
+	weight = c(rep(1/length(economoicdf),length(economoicdf)), rep(1/length(needdf),length(needdf)),
+			   rep(1/length(infrasdf),length(infrasdf)), rep(1/length(areadf),length(areadf))),
+	theory = c(rep(7/6, length(economoicdf)), rep(1, length(needdf)), 
+			 rep(5/6, length(infrasdf)), rep(2/3, length(areadf))),
+	year = 'ANY',
+	stringsAsFactors = FALSE
+)
+
+library(fmsb)
+RAD = function(yeari, para){ 
+	#1990,2000,2010; 'Beta','Intercept';
+
+	foo1 = subset(foo, foo$year==yeari)
+	dat1 = as.data.frame(t(foo1[,grep(para,colnames(foo1))]))
+	colnames(dat1)=foo1$yIndex
+	dat1 = dat1[,dfmat$yname]
+	
+	if (para=='Beta'){
+	up = 1.3
+	down = 0.3
+	}else if(para=='Intercept'){
+	up = 9.4
+	down = -0.5
+	}else if(para=='Rsquare'){
+	up = 0.95
+	down = 0.1
+	}else{print('opps!')}
+	
+	dat = rbind(rep(up, ncol(dat1)), 
+				rep(down, ncol(dat1)), dat1)
+
+	### radar chart
+	colors_border=c( rgb(0.2,0.5,0.5,0.9), rgb(0.8,0.2,0.5,0.9) , rgb(0.7,0.5,0.1,0.9) )
+	colors_in=c( rgb(0.2,0.5,0.5,0.2), rgb(0.8,0.2,0.5,0.2) , rgb(0.7,0.5,0.1,0.2) )
+
+	png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/OLS_DJS_sxq_R/Radar',para,yeari,'.png'),
+			  width=15,height=15, units='cm',res=180)
+	radarchart( dat  , axistype=1 , pty=32, 
+	   pcol=colors_border , pfcol=colors_in , plwd=3 , plty=1, seg=5,
+	   cglcol="grey", cglty=1, axislabcol="darkgrey",  cglwd=0.8, 
+	   vlcex=0.7, centerzero=T, caxislabels=seq(down, up, length.out=6),
+	   )
+	legend(x=0.78, y=1.35, legend = c('Resident', 'Registered'), #x=0.75, y=1.3
+		   bty = "n", pch=20 , col=colors_border , text.col = "black", title=paste(yeari,para),
+		   cex=1, pt.cex=2)
+	dev.off()
+}
+for(yeari in c(1990,2000,2010)){RAD(yeari, 'Beta')}
+for(yeari in c(1990,2000,2010)){RAD(yeari, 'Intercept')}
+for(yeari in c(1990,2000,2010)){RAD(yeari, 'Rsquare')}
+
+
+####################
+# POP density 
+
+cordf2 = data.frame(POP = log(c(cordf1$xindex, cordf1$yindex)), 
+					R = c(rep('Resident',nrow(cordf1)),rep('Registered',nrow(cordf1))),
+					year = rep(cordf1$year,2)
+					)
+
+
+
+for (yeari in c(1990,2000,2010)){
+
+cordf3 = subset(cordf2,cordf2$year==yeari)
+a = aggregate(cordf3$POP, by=list(cordf3$year,cordf3$R),mean)
+
+pt = t.test(log(cordf3[cordf3$R=='Resident','POP']), log(cordf3[cordf3$R=='Registered','POP']), paired=T,alternative = 'two.sided')
+zf = round(pt$conf.int[2] - pt$estimate,3)
+print(paste0(yeari, ': log(POP.Resident)-log(POP.Registered)=', round(pt$estimate,3),'±',zf))
+
+png(filename=paste0('C:/Sync/CoolGirl/Fhe/Results/OLS_DJS_sxq_R/POPdensity',yeari,'.png'),
+			  width=15,height=15, units='cm',res=180)
+p = ggplot(cordf3, aes(x=POP)) +
+	geom_density(aes(color = R),lwd=1.3) +
+	geom_vline(data=a, aes(xintercept=x, color=Group.2),
+             linetype="dashed") +
+	labs(x='Population size (log)',y='Density') +
+	guides(color=guide_legend(paste0('Δx = ', round(pt$estimate,3),' ± ',zf,' \n \n',yeari)))+
+	theme(
+	  text = element_text(size=18),
+	  panel.background = element_rect(fill = "transparent",colour = 'black'), 
+	  panel.grid.minor = element_blank(),
+	  panel.grid.major = element_blank(),
+	  legend.key = element_rect(fill = "transparent", color = "transparent"), 
+	  legend.position=c(0.8,0.7),
+	  #plot.background = element_rect(fill = "transparent",colour = NA),
+	  legend.title=element_text(size=14)
+	  #,
+	  #axis.text.x = element_text(angle = 45, vjust=1.1, hjust=1)
+	  )
+print(p)
+dev.off()
+}
+
+
+
