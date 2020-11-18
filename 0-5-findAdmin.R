@@ -473,6 +473,7 @@ del3 = adminallyear$cityshi=='沙市市' & adminallyear$year %in% 1997
 del4 = adminallyear$cityshi=='思茅市' & adminallyear$year %in% 2008:2018
 del5 = adminallyear$cityshi=='通什市' & adminallyear$year %in% 2002:2018
 del6 = adminallyear$cityshi=='襄樊市' & adminallyear$year %in% 2012
+del7 = adminallyear$cityshi=='阿拉山口县级市' & adminallyear$year %in% 2015:2016
 
 add14 = data.frame(cityshi=rep('阿拉尔市',1),city=rep('阿拉尔',1),admin=rep('县级',1),yeari=2004)
 add15 = data.frame(cityshi=rep('阿拉山口市',2),city=rep('阿拉山口',2),admin=rep('县级',2),yeari=c(2015:2016))
@@ -490,7 +491,7 @@ add11 = data.frame(cityshi=rep('五指山市',1),city=rep('五指山',1),admin=r
 add12 = data.frame(cityshi=rep('襄阳市',1),city=rep('襄阳',1),admin=rep('地级',1),yeari=2012)
 add13 = data.frame(cityshi=rep('宣城市',1),city=rep('宣城',1),admin=rep('地级',1),yeari=2006)
 
-adminallyear = adminallyear[!(del3|del4|del5|del6),]
+adminallyear = adminallyear[!(del3|del4|del5|del6|del7),]
 adminallyear = rbind(adminallyear,add1,add2,add3,add4,add5,add6,add7,add8,add9,add10,add11,add12,add13,add14,add15)
 
 adminallyear = unique(adminallyear)
